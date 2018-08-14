@@ -89,15 +89,16 @@ def test_gate():
 
 @pytest.mark.parametrize('n', [30, 60])
 def test_walkway(n):
-    pos_left = ((np.random.random((n, 2)) - 0.5) * 2.0) * torch.tensor([25.0, 5.0])
-    pos_right = ((np.random.random((n, 2)) - 0.5) * 2.0) * torch.tensor([25.0, 5.0])
+    pos_left = ((torch.rand((n, 2)) - 0.5) * 2.0) * torch.tensor([25.0, 5.0])
+    pos_right = ((torch.rand((n, 2)) - 0.5) * 2.0) * torch.tensor([25.0, 5.0])
 
-    x_vel_left = np.random.normal(1.34, 0.26, size=(n, 1))
-    x_vel_right = np.random.normal(-1.34, 0.26, size=(n, 1))
-    x_destination_left = 100.0 * torch.ones((n, 1))
-    x_destination_right = -100.0 * torch.ones((n, 1))
+    ones = torch.ones((n, 1))
+    zeros = torch.zeros((n, 1))
 
-    zeros = np.zeros((n, 1))
+    x_vel_left = torch.normal(1.34 * ones, 0.26)
+    x_vel_right = torch.normal(-1.34 * ones, 0.26)
+    x_destination_left = 100.0 * ones
+    x_destination_right = -100.0 * ones
 
     state_left = torch.cat(
         (pos_left, x_vel_left, zeros, x_destination_left, zeros), dim=-1)
