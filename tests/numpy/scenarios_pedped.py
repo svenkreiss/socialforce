@@ -1,14 +1,14 @@
-import torch
-import socialforce
+import numpy as np
+import socialforce.numpy
 
 
 def test_crossing():
-    initial_state = torch.tensor([
+    initial_state = np.array([
         [0.0, 0.0, 0.5, 0.5, 10.0, 10.0],
         [10.0, 0.3, -0.5, 0.5, 0.0, 10.0],
-    ], requires_grad=True)
-    s = socialforce.Simulator(initial_state)
-    states = torch.stack([s.step().state.clone() for _ in range(50)]).detach().numpy()
+    ])
+    s = socialforce.numpy.Simulator(initial_state)
+    states = np.stack([s.step().state.copy() for _ in range(50)])
 
     # visualize
     print('')
@@ -24,12 +24,12 @@ def test_crossing():
 
 
 def test_narrow_crossing():
-    initial_state = torch.tensor([
+    initial_state = np.array([
         [0.0, 0.0, 0.5, 0.5, 2.0, 10.0],
         [2.0, 0.3, -0.5, 0.5, 0.0, 10.0],
-    ], requires_grad=True)
-    s = socialforce.Simulator(initial_state)
-    states = torch.stack([s.step().state.clone() for _ in range(40)]).detach().numpy()
+    ])
+    s = socialforce.numpy.Simulator(initial_state)
+    states = np.stack([s.step().state.copy() for _ in range(40)])
 
     # visualize
     print('')
@@ -45,12 +45,12 @@ def test_narrow_crossing():
 
 
 def test_opposing():
-    initial_state = torch.tensor([
+    initial_state = np.array([
         [0.0, 0.0, 1.0, 0.0, 0.0, 10.0],
         [-0.3, 10.0, -1.0, 0.0, -0.3, 0.0],
-    ], requires_grad=True)
-    s = socialforce.Simulator(initial_state)
-    states = torch.stack([s.step().state.clone() for _ in range(21)]).detach().numpy()
+    ])
+    s = socialforce.numpy.Simulator(initial_state)
+    states = np.stack([s.step().state.copy() for _ in range(21)])
 
     # visualize
     print('')
@@ -66,13 +66,13 @@ def test_opposing():
 
 
 def test_2opposing():
-    initial_state = torch.tensor([
+    initial_state = np.array([
         [0.0, 0.0, 0.5, 0.0, 0.0, 10.0],
         [0.6, 10.0, -0.5, 0.0, 0.6, 0.0],
         [2.0, 10.0, -0.5, 0.0, 2.0, 0.0],
-    ], requires_grad=True)
-    s = socialforce.Simulator(initial_state)
-    states = torch.stack([s.step().state.clone() for _ in range(40)]).detach().numpy()
+    ])
+    s = socialforce.numpy.Simulator(initial_state)
+    states = np.stack([s.step().state.copy() for _ in range(40)])
 
     # visualize
     print('')

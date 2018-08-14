@@ -1,4 +1,4 @@
-"""PyTorch implementation of the Social Force model."""
+"""Numpy implementation of the Social Force model."""
 
 __version__ = '0.1.0'
 

@@ -1,16 +1,12 @@
 from contextlib import contextmanager
 import numpy as np
 import pytest
-import socialforce
-import torch
+import socialforce.numpy
 
 
 @contextmanager
 def visualize(states, space, output_filename):
     import matplotlib.pyplot as plt
-
-    states = states.detach().numpy()
-    space = [s.numpy() for s in space]
 
     print('')
     with socialforce.show.animation(
@@ -48,14 +44,14 @@ def visualize(states, space, output_filename):
 
 @pytest.mark.plot
 def test_separator():
-    initial_state = torch.tensor([
+    initial_state = np.array([
         [-10.0, -0.0, 1.0, 0.0, 10.0, 0.0],
-    ], requires_grad=True)
+    ])
     space = [
-        torch.tensor([(i, i) for i in np.linspace(-1, 4.0)]),
+        np.array([(i, i) for i in np.linspace(-1, 4.0)]),
     ]
-    s = socialforce.Simulator(initial_state, socialforce.PedSpacePotential(space))
-    states = torch.stack([s.step().state.clone() for _ in range(80)])
+    s = socialforce.numpy.Simulator(initial_state, socialforce.numpy.PedSpacePotential(space))
+    states = np.stack([s.step().state.copy() for _ in range(80)])
 
     # visualize
     with visualize(states, space, 'docs/separator.gif') as ax:
@@ -64,7 +60,7 @@ def test_separator():
 
 @pytest.mark.plot
 def test_gate():
-    initial_state = torch.tensor([
+    initial_state = np.array([
         [-9.0, -0.0, 1.0, 0.0, 10.0, 0.0],
         [-10.0, -1.5, 1.0, 0.0, 10.0, 0.0],
         [-10.0, -2.0, 1.0, 0.0, 10.0, 0.0],
@@ -75,13 +71,13 @@ def test_gate():
         [10.0, 3.0, -1.0, 0.0, -10.0, 0.0],
         [10.0, 4.0, -1.0, 0.0, -10.0, 0.0],
         [10.0, 5.0, -1.0, 0.0, -10.0, 0.0],
-    ], requires_grad=True)
+    ])
     space = [
-        torch.tensor([(0.0, y) for y in np.linspace(-10, -0.7, 1000)]),
-        torch.tensor([(0.0, y) for y in np.linspace(0.7, 10, 1000)]),
+        np.array([(0.0, y) for y in np.linspace(-10, -0.7, 1000)]),
+        np.array([(0.0, y) for y in np.linspace(0.7, 10, 1000)]),
     ]
-    s = socialforce.Simulator(initial_state, socialforce.PedSpacePotential(space))
-    states = torch.stack([s.step().state.clone() for _ in range(150)])
+    s = socialforce.numpy.Simulator(initial_state, socialforce.numpy.PedSpacePotential(space))
+    states = np.stack([s.step().state.copy() for _ in range(150)])
 
     with visualize(states, space, 'docs/gate.gif') as _:
         pass
@@ -89,27 +85,27 @@ def test_gate():
 
 @pytest.mark.parametrize('n', [30, 60])
 def test_walkway(n):
-    pos_left = ((np.random.random((n, 2)) - 0.5) * 2.0) * torch.tensor([25.0, 5.0])
-    pos_right = ((np.random.random((n, 2)) - 0.5) * 2.0) * torch.tensor([25.0, 5.0])
+    pos_left = ((np.random.random((n, 2)) - 0.5) * 2.0) * np.array([25.0, 5.0])
+    pos_right = ((np.random.random((n, 2)) - 0.5) * 2.0) * np.array([25.0, 5.0])
 
     x_vel_left = np.random.normal(1.34, 0.26, size=(n, 1))
     x_vel_right = np.random.normal(-1.34, 0.26, size=(n, 1))
-    x_destination_left = 100.0 * torch.ones((n, 1))
-    x_destination_right = -100.0 * torch.ones((n, 1))
+    x_destination_left = 100.0 * np.ones((n, 1))
+    x_destination_right = -100.0 * np.ones((n, 1))
 
     zeros = np.zeros((n, 1))
 
-    state_left = torch.cat(
-        (pos_left, x_vel_left, zeros, x_destination_left, zeros), dim=-1)
-    state_right = torch.cat(
-        (pos_right, x_vel_right, zeros, x_destination_right, zeros), dim=-1)
-    initial_state = torch.cat((state_left, state_right))
+    state_left = np.concatenate(
+        (pos_left, x_vel_left, zeros, x_destination_left, zeros), axis=-1)
+    state_right = np.concatenate(
+        (pos_right, x_vel_right, zeros, x_destination_right, zeros), axis=-1)
+    initial_state = np.concatenate((state_left, state_right))
 
     space = [
-        torch.tensor([(x, 5) for x in np.linspace(-25, 25, num=5000)]),
-        torch.tensor([(x, -5) for x in np.linspace(-25, 25, num=5000)]),
+        np.array([(x, 5) for x in np.linspace(-25, 25, num=5000)]),
+        np.array([(x, -5) for x in np.linspace(-25, 25, num=5000)]),
     ]
-    s = socialforce.Simulator(initial_state, socialforce.PedSpacePotential(space))
+    s = socialforce.numpy.Simulator(initial_state, socialforce.numpy.PedSpacePotential(space))
     states = []
     for _ in range(250):
         state = s.step().state
@@ -117,8 +113,8 @@ def test_walkway(n):
         state[state[:, 0] > 25, 0] -= 50
         state[state[:, 0] < -25, 0] += 50
 
-        states.append(state.clone())
-    states = torch.stack(states)
+        states.append(state.copy())
+    states = np.stack(states)
 
     with visualize(states, space, 'docs/walkway_{}.gif'.format(n)) as _:
         pass

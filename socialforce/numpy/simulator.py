@@ -5,7 +5,7 @@
 See Helbing and Molnár 1998.
 """
 
-import torch
+import numpy as np
 
 from .potentials import PedPedPotential
 from .fieldofview import FieldOfView
@@ -35,8 +35,8 @@ class Simulator(object):
 
         if self.state.shape[1] < 7:
             if not hasattr(tau, 'shape'):
-                tau = tau * torch.ones(self.state.size(0))
-            self.state = torch.cat((self.state, tau.unsqueeze(-1)), dim=-1)
+                tau = tau * np.ones(self.state.shape[0])
+            self.state = np.concatenate((self.state, np.expand_dims(tau, -1)), axis=-1)
 
         # potentials
         self.V = PedPedPotential(self.delta_t)
@@ -52,15 +52,14 @@ class Simulator(object):
     def f_aB(self):
         """Compute f_aB."""
         if self.U is None:
-            return None
+            return np.zeros((self.state.shape[0], 0, 2))
         return -1.0 * self.U.grad_r_aB(self.state)
 
     def capped_velocity(self, desired_velocity):
         """Scale down a desired velocity to its capped speed."""
-        desired_speeds = torch.norm(desired_velocity, dim=-1)
-        # factor = torch.minimum(1.0, self.max_speeds / desired_speeds)
-        factor = torch.clamp(self.max_speeds / desired_speeds, max=1.0)
-        return desired_velocity * factor.unsqueeze(-1)
+        desired_speeds = np.linalg.norm(desired_velocity, axis=-1)
+        factor = np.minimum(1.0, self.max_speeds / desired_speeds)
+        return desired_velocity * np.expand_dims(factor, -1)
 
     def step(self):
         """Do one step in the simulation and update the state in place."""
@@ -68,24 +67,18 @@ class Simulator(object):
         e = stateutils.desired_directions(self.state)
         vel = self.state[:, 2:4]
         tau = self.state[:, 6:7]
-        F0 = 1.0 / tau * (self.initial_speeds.unsqueeze(-1) * e - vel)
+        F0 = 1.0 / tau * (np.expand_dims(self.initial_speeds, -1) * e - vel)
 
         # repulsive terms between pedestrians
-        F_ab = None
         f_ab = self.f_ab()
-        if f_ab is not None:
-            w = self.w(e, -f_ab).unsqueeze(-1)
-            F_ab = w * f_ab
+        w = np.expand_dims(self.w(e, -f_ab), -1)
+        F_ab = w * f_ab
 
         # repulsive terms between pedestrians and boundaries
         F_aB = self.f_aB()
 
         # social force
-        F = F0
-        if F_ab is not None:
-            F += torch.sum(F_ab, dim=1)
-        if F_aB is not None:
-            F += torch.sum(F_aB, dim=1)
+        F = F0 + np.sum(F_ab, axis=1) + np.sum(F_aB, axis=1)
         # desired velocity
         w = self.state[:, 2:4] + self.delta_t * F
         # velocity

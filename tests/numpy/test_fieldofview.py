@@ -1,23 +1,23 @@
 """Test field-of-view computations."""
 
-import torch
+import numpy as np
 from socialforce.fieldofview import FieldOfView
 
 
 def test_w():
     assert FieldOfView()(
-        torch.tensor([
+        np.array([
             [1.0, 0.0],
             [-1.0, 0.0],
         ]),
-        torch.tensor([[
+        np.array([[
             [0.0, 0.0],
             [1.0, 1.0],
         ], [
             [-1.0, 1.0],
             [0.0, 0.0],
         ]])
-    ).numpy().tolist() == [
+    ).tolist() == [
         [0, 1],
         [1, 0],
     ]

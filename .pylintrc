@@ -11,4 +11,4 @@ good-names=b,e,f,f_aB,F0,F_ab,F_aB,F,grad_r_aB,i,n,nx,ny,xy,r,r_aB,U,u0,V,v0,val
 generated-members=numpy.*,torch.*
 
 
-disable=useless-object-inheritance,too-many-instance-attributes,too-few-public-methods,too-many-arguments
+disable=useless-object-inheritance,too-many-instance-attributes,too-few-public-methods,too-many-arguments,E1102

@@ -1,15 +1,15 @@
 """Utility functions to process state."""
 
-import torch
+import numpy as np
 
 
 def desired_directions(state):
     """Given the current state and destination, compute desired direction."""
     destination_vectors = state[:, 4:6] - state[:, 0:2]
-    norm_factors = torch.norm(destination_vectors, dim=-1)
-    return destination_vectors / norm_factors.unsqueeze(-1)
+    norm_factors = np.linalg.norm(destination_vectors, axis=-1)
+    return destination_vectors / np.expand_dims(norm_factors, -1)
 
 
 def speeds(state):
     """Return the speeds corresponding to a given state."""
-    return torch.norm(state[:, 2:4], dim=-1)
+    return np.linalg.norm(state[:, 2:4], axis=-1)

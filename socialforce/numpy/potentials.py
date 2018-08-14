@@ -1,6 +1,6 @@
 """Interaction potentials."""
 
-import torch
+import numpy as np
 
 from . import stateutils
 
@@ -19,28 +19,28 @@ class PedPedPotential(object):
 
     def b(self, r_ab, speeds, desired_directions):
         """Calculate b."""
-        speeds_b = speeds.unsqueeze(0).detach()
-        speeds_b_abc = speeds_b.unsqueeze(2)  # abc = alpha, beta, coordinates
-        e_b = desired_directions.unsqueeze(0)
+        speeds_b = np.expand_dims(speeds, axis=0)
+        speeds_b_abc = np.expand_dims(speeds_b, axis=2)  # abc = alpha, beta, coordinates
+        e_b = np.expand_dims(desired_directions, axis=0)
 
         in_sqrt = (
-            torch.norm(r_ab, dim=-1) +
-            torch.norm(r_ab - self.delta_t * speeds_b_abc * e_b, dim=-1)
+            np.linalg.norm(r_ab, axis=-1) +
+            np.linalg.norm(r_ab - self.delta_t * speeds_b_abc * e_b, axis=-1)
         )**2 - (self.delta_t * speeds_b)**2
-        in_sqrt[torch.eye(in_sqrt.shape[0], dtype=torch.uint8)] = 0.0
+        np.fill_diagonal(in_sqrt, 0.0)
 
-        return 0.5 * torch.sqrt(in_sqrt)
+        return 0.5 * np.sqrt(in_sqrt)
 
     def value_r_ab(self, r_ab, speeds, desired_directions):
         """Value of potential explicitely parametrized with r_ab."""
-        return self.v0 * torch.exp(-self.b(r_ab, speeds, desired_directions) / self.sigma)
+        return self.v0 * np.exp(-self.b(r_ab, speeds, desired_directions) / self.sigma)
 
     @staticmethod
     def r_ab(state):
         """r_ab"""
         r = state[:, 0:2]
-        r_a = r.unsqueeze(1)
-        r_b = r.unsqueeze(0).detach()
+        r_a = np.expand_dims(r, 1)
+        r_b = np.expand_dims(r, 0)
         return r_a - r_b
 
     def __call__(self, state):
@@ -53,18 +53,18 @@ class PedPedPotential(object):
         speeds = stateutils.speeds(state)
         desired_directions = stateutils.desired_directions(state)
 
-        dx = torch.tensor([[[delta, 0.0]]])
-        dy = torch.tensor([[[0.0, delta]]])
+        dx = np.array([[[delta, 0.0]]])
+        dy = np.array([[[0.0, delta]]])
 
         v = self.value_r_ab(r_ab, speeds, desired_directions)
         dvdx = (self.value_r_ab(r_ab + dx, speeds, desired_directions) - v) / delta
         dvdy = (self.value_r_ab(r_ab + dy, speeds, desired_directions) - v) / delta
 
         # remove gradients from self-intereactions
-        dvdx[torch.eye(dvdx.shape[0], dtype=torch.uint8)] = 0.0
-        dvdy[torch.eye(dvdx.shape[0], dtype=torch.uint8)] = 0.0
+        np.fill_diagonal(dvdx, 0.0)
+        np.fill_diagonal(dvdy, 0.0)
 
-        return torch.stack((dvdx, dvdy), dim=-1)
+        return np.stack((dvdx, dvdy), axis=-1)
 
 
 class PedSpacePotential(object):
@@ -83,20 +83,20 @@ class PedSpacePotential(object):
 
     def value_r_aB(self, r_aB):
         """Compute value parametrized with r_aB."""
-        return self.u0 * torch.exp(-1.0 * torch.norm(r_aB, dim=-1) / self.r)
+        return self.u0 * np.exp(-1.0 * np.linalg.norm(r_aB, axis=-1) / self.r)
 
     def r_aB(self, state):
         """r_aB"""
         if not self.space:
-            return torch.zeros((state.shape[0], 0, 2))
+            return np.zeros((state.shape[0], 0, 2))
 
-        r_a = state[:, 0:2].unsqueeze(1)
+        r_a = np.expand_dims(state[:, 0:2], 1)
         closest_i = [
-            torch.argmin(torch.norm(r_a - B.unsqueeze(0), dim=-1), dim=1)
+            np.argmin(np.linalg.norm(r_a - np.expand_dims(B, 0), axis=-1), axis=1)
             for B in self.space
         ]
-        closest_points = torch.transpose(
-            torch.stack([B[i] for B, i in zip(self.space, closest_i)]),
+        closest_points = np.swapaxes(
+            np.stack([B[i] for B, i in zip(self.space, closest_i)]),
             0, 1)  # index order: pedestrian, boundary, coordinates
         return r_a - closest_points
 
@@ -107,11 +107,11 @@ class PedSpacePotential(object):
         """Compute gradient wrt r_aB using finite difference differentiation."""
         r_aB = self.r_aB(state)
 
-        dx = torch.tensor([[[delta, 0.0]]])
-        dy = torch.tensor([[[0.0, delta]]])
+        dx = np.array([[[delta, 0.0]]])
+        dy = np.array([[[0.0, delta]]])
 
         v = self.value_r_aB(r_aB)
         dvdx = (self.value_r_aB(r_aB + dx) - v) / delta
         dvdy = (self.value_r_aB(r_aB + dy) - v) / delta
 
-        return torch.stack((dvdx, dvdy), dim=-1)
+        return np.stack((dvdx, dvdy), axis=-1)
