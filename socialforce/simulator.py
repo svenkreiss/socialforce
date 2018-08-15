@@ -26,7 +26,7 @@ class Simulator(object):
     delta_t in seconds.
     tau in seconds: either float or numpy array of shape[n_ped].
     """
-    def __init__(self, initial_state, ped_space=None, delta_t=0.4, tau=0.5):
+    def __init__(self, initial_state, ped_space=None, ped_ped=None, delta_t=0.4, tau=0.5):
         self.state = initial_state
         self.initial_speeds = stateutils.speeds(initial_state)
         self.max_speeds = MAX_SPEED_MULTIPLIER * self.initial_speeds
@@ -39,7 +39,7 @@ class Simulator(object):
             self.state = torch.cat((self.state, tau.unsqueeze(-1)), dim=-1)
 
         # potentials
-        self.V = PedPedPotential(self.delta_t)
+        self.V = ped_ped or PedPedPotential(self.delta_t)
         self.U = ped_space
 
         # field of view
