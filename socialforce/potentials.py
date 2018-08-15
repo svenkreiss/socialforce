@@ -47,7 +47,7 @@ class PedPedPotential(object):
         speeds = stateutils.speeds(state)
         return self.value_r_ab(self.r_ab(state), speeds, stateutils.desired_directions(state))
 
-    def grad_r_ab(self, state, delta=1e-3):
+    def grad_r_a_finite_difference(self, state, delta=1e-3):
         """Compute gradient wrt r_ab using finite difference differentiation."""
         r_ab = self.r_ab(state)
         speeds = stateutils.speeds(state)
@@ -64,7 +64,21 @@ class PedPedPotential(object):
         dvdx[torch.eye(dvdx.shape[0], dtype=torch.uint8)] = 0.0
         dvdy[torch.eye(dvdx.shape[0], dtype=torch.uint8)] = 0.0
 
-        return torch.stack((dvdx, dvdy), dim=-1)
+        return torch.stack((dvdx, dvdy), dim=-1).sum(axis=1)
+
+    def grad_r_a(self, state):
+        """Compute gradient wrt r_ab using autograd."""
+        print(state)
+        r_ab = self.r_ab(state)
+        speeds = stateutils.speeds(state)
+        desired_directions = stateutils.desired_directions(state)
+
+        v = self.value_r_ab(r_ab, speeds, desired_directions)
+        # v.zero_grad()
+        v.backward(torch.ones_like(v))
+        print(state)
+        print(state.grad)
+        return state.grad[:, 0:2]
 
 
 class PedSpacePotential(object):

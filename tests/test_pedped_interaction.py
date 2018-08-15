@@ -21,20 +21,17 @@ def test_rab():
     ]]
 
 
-def test_fab():
+def test_f_pedped():
     initial_state = torch.tensor([
         [0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
         [1.0, 0.0, 0.0, 0.0, 1.0, 1.0],
     ], requires_grad=True)
     s = socialforce.Simulator(initial_state)
-    force_at_unit_distance = 0.25  # TODO confirm
-    assert s.f_ab().detach().numpy() == pytest.approx(np.array([[
-        [0.0, 0.0],
+    force_at_unit_distance = 0.25  # confirmed below
+    assert s.f_pedped().detach().numpy() == pytest.approx(np.array([
         [-force_at_unit_distance, 0.0],
-    ], [
         [force_at_unit_distance, 0.0],
-        [0.0, 0.0],
-    ]]), abs=0.05)
+    ]), abs=0.05)
 
 
 def test_b_zero_vel():
