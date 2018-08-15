@@ -89,6 +89,8 @@ def test_gate():
 
 @pytest.mark.parametrize('n', [30, 60])
 def test_walkway(n):
+    torch.manual_seed(42)
+
     pos_left = ((torch.rand((n, 2)) - 0.5) * 2.0) * torch.tensor([25.0, 5.0])
     pos_right = ((torch.rand((n, 2)) - 0.5) * 2.0) * torch.tensor([25.0, 5.0])
 

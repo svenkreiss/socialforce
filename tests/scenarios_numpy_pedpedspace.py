@@ -85,6 +85,8 @@ def test_gate():
 
 @pytest.mark.parametrize('n', [30, 60])
 def test_walkway(n):
+    np.random.seed(42)
+
     pos_left = ((np.random.random((n, 2)) - 0.5) * 2.0) * np.array([25.0, 5.0])
     pos_right = ((np.random.random((n, 2)) - 0.5) * 2.0) * np.array([25.0, 5.0])
 
