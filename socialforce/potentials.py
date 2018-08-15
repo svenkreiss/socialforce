@@ -19,7 +19,7 @@ class PedPedPotential(object):
 
     def b(self, r_ab, speeds, desired_directions):
         """Calculate b."""
-        speeds_b = speeds.unsqueeze(0).detach()
+        speeds_b = speeds.unsqueeze(0)
         speeds_b_abc = speeds_b.unsqueeze(2)  # abc = alpha, beta, coordinates
         e_b = desired_directions.unsqueeze(0)
 
@@ -37,19 +37,19 @@ class PedPedPotential(object):
 
     @staticmethod
     def r_ab(state):
-        """r_ab"""
+        """Construct r_ab using broadcasting."""
         r = state[:, 0:2]
-        r_a = r.unsqueeze(1)
-        r_b = r.unsqueeze(0).detach()
-        return r_a - r_b
+        r_a0 = r.unsqueeze(1)
+        r_0b = r.unsqueeze(0)
+        return r_a0 - r_0b
 
     def __call__(self, state):
         speeds = stateutils.speeds(state)
         return self.value_r_ab(self.r_ab(state), speeds, stateutils.desired_directions(state))
 
-    def grad_r_a_finite_difference(self, state, delta=1e-3):
+    def grad_r_ab_finite_difference(self, state, delta=1e-3):
         """Compute gradient wrt r_ab using finite difference differentiation."""
-        r_ab = self.r_ab(state)
+        r_ab = self.r_ab(state[:, 0:2])
         speeds = stateutils.speeds(state)
         desired_directions = stateutils.desired_directions(state)
 
@@ -64,21 +64,17 @@ class PedPedPotential(object):
         dvdx[torch.eye(dvdx.shape[0], dtype=torch.uint8)] = 0.0
         dvdy[torch.eye(dvdx.shape[0], dtype=torch.uint8)] = 0.0
 
-        return torch.stack((dvdx, dvdy), dim=-1).sum(axis=1)
+        return torch.stack((dvdx, dvdy), dim=-1)
 
-    def grad_r_a(self, state):
+    def grad_r_ab(self, state):
         """Compute gradient wrt r_ab using autograd."""
-        print(state)
-        r_ab = self.r_ab(state)
+        r_ab = self.r_ab(state).detach().requires_grad_()
         speeds = stateutils.speeds(state)
         desired_directions = stateutils.desired_directions(state)
 
         v = self.value_r_ab(r_ab, speeds, desired_directions)
-        # v.zero_grad()
         v.backward(torch.ones_like(v))
-        print(state)
-        print(state.grad)
-        return state.grad[:, 0:2]
+        return r_ab.grad
 
 
 class PedSpacePotential(object):

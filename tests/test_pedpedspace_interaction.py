@@ -6,7 +6,7 @@ def test_r_aB():
     state = torch.tensor([
         [0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
         [1.0, 0.0, 0.0, 0.0, 1.0, 1.0],
-    ], requires_grad=True)
+    ])
     space = [
         torch.tensor([[0.0, 100.0], [0.0, 0.5]])
     ]

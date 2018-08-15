@@ -50,9 +50,9 @@ def visualize(states, space, output_filename):
 def test_separator():
     initial_state = torch.tensor([
         [-10.0, -0.0, 1.0, 0.0, 10.0, 0.0],
-    ], requires_grad=True)
+    ])
     space = [
-        torch.tensor([(i, i) for i in np.linspace(-1, 4.0)]),
+        torch.tensor([(i, i) for i in np.linspace(-1, 4.0, 500)]),
     ]
     s = socialforce.Simulator(initial_state, socialforce.PedSpacePotential(space))
     states = torch.stack([s.step().state.clone() for _ in range(80)])
@@ -75,7 +75,7 @@ def test_gate():
         [10.0, 3.0, -1.0, 0.0, -10.0, 0.0],
         [10.0, 4.0, -1.0, 0.0, -10.0, 0.0],
         [10.0, 5.0, -1.0, 0.0, -10.0, 0.0],
-    ], requires_grad=True)
+    ])
     space = [
         torch.tensor([(0.0, y) for y in np.linspace(-10, -0.7, 1000)]),
         torch.tensor([(0.0, y) for y in np.linspace(0.7, 10, 1000)]),

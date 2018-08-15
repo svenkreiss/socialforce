@@ -7,12 +7,12 @@ import numpy as np
 
 
 def test_rab():
-    state = torch.tensor([
-        [0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
-        [1.0, 0.0, 0.0, 0.0, 1.0, 1.0],
-    ], requires_grad=True)
+    r = torch.tensor([
+        [0.0, 0.0],
+        [1.0, 0.0],
+    ])
     V = socialforce.PedPedPotential(0.4)
-    assert V.r_ab(state).tolist() == [[
+    assert V.r_ab(r).tolist() == [[
         [0.0, 0.0],
         [-1.0, 0.0],
     ], [
@@ -21,17 +21,20 @@ def test_rab():
     ]]
 
 
-def test_f_pedped():
+def test_f_ab():
     initial_state = torch.tensor([
         [0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
         [1.0, 0.0, 0.0, 0.0, 1.0, 1.0],
-    ], requires_grad=True)
+    ])
     s = socialforce.Simulator(initial_state)
     force_at_unit_distance = 0.25  # confirmed below
-    assert s.f_pedped().detach().numpy() == pytest.approx(np.array([
+    assert s.f_ab().detach().numpy() == pytest.approx(np.array([[
+        [0.0, 0.0],
         [-force_at_unit_distance, 0.0],
+    ], [
         [force_at_unit_distance, 0.0],
-    ]), abs=0.05)
+        [0.0, 0.0],
+    ]]), abs=0.05)
 
 
 def test_b_zero_vel():
@@ -55,13 +58,13 @@ def test_torch_potential_gradient():
     state = torch.tensor([
         [0.0, 0.0, 0.0, 0.0, 1.0, 0.0],
         [1.0, 0.0, 0.0, 0.0, -1.0, 0.0],
-    ], requires_grad=True)
+    ])
     v0 = torch.Tensor([2.1])
     sigma = torch.Tensor([0.3])
 
-    r = state[:, 0:2]
+    r = state[:, 0:2].detach().requires_grad_()
     r_a = r.unsqueeze(1)
-    r_b = r.unsqueeze(0).detach()  # !!!!!!!!!! otherwise gradient of b will accumulate into a
+    r_b = r.unsqueeze(0).detach()  # !!! gradient of b will accumulate into a without detach()
     r_ab = r_a - r_b
     r_ab_norm = torch.norm(r_ab, dim=-1)
     print(r_ab_norm)
@@ -73,9 +76,9 @@ def test_torch_potential_gradient():
     print('value', pedped_potential)
     gradients = torch.ones_like(pedped_potential)
     pedped_potential.backward(gradients)
-    print(state.grad)
+    print(r.grad)
 
     analytic_abs_grad_value = 2.1 * math.exp(-1.0/0.3) * 1.0/0.3
     print(analytic_abs_grad_value)
-    assert state.grad[0][0] == analytic_abs_grad_value
-    assert state.grad[1][0] == -analytic_abs_grad_value
+    assert r.grad[0][0] == analytic_abs_grad_value
+    assert r.grad[1][0] == -analytic_abs_grad_value

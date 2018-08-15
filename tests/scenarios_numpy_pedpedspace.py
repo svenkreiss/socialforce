@@ -48,7 +48,7 @@ def test_separator():
         [-10.0, -0.0, 1.0, 0.0, 10.0, 0.0],
     ])
     space = [
-        np.array([(i, i) for i in np.linspace(-1, 4.0)]),
+        np.array([(i, i) for i in np.linspace(-1, 4.0, 500)]),
     ]
     s = socialforce.numpy.Simulator(initial_state, socialforce.numpy.PedSpacePotential(space))
     states = np.stack([s.step().state.copy() for _ in range(80)])

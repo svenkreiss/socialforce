@@ -18,10 +18,10 @@ class FieldOfView(object):
         """Weighting factor for field of view.
 
         e is rank 2 and normalized in the last index.
-        f is a rank 2 tensor.
+        f is a rank 3 tensor.
         """
-        in_sight = torch.einsum('aj,aj->a', (e, f)) > torch.norm(f, dim=-1) * self.cosphi
+        in_sight = torch.einsum('aj,abj->ab', (e, f)) > torch.norm(f, dim=-1) * self.cosphi
         out = self.out_of_view_factor * torch.ones_like(in_sight, dtype=torch.float)
         out[in_sight] = 1.0
-        # out[torch.eye(out.shape[0], dtype=torch.uint8)] = 0.0
+        out[torch.eye(out.shape[0], dtype=torch.uint8)] = 0.0
         return out

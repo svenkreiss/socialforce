@@ -37,7 +37,6 @@ class Simulator(object):
             if not hasattr(tau, 'shape'):
                 tau = tau * torch.ones(self.state.size(0))
             self.state = torch.cat((self.state, tau.unsqueeze(-1)), dim=-1)
-        self.state = self.state.detach().requires_grad_()
 
         # potentials
         self.V = PedPedPotential(self.delta_t)
@@ -46,9 +45,9 @@ class Simulator(object):
         # field of view
         self.w = FieldOfView()
 
-    def f_pedped(self):
+    def f_ab(self):
         """Compute f_ab."""
-        return -1.0 * self.V.grad_r_a(self.state)
+        return -1.0 * self.V.grad_r_ab(self.state)
 
     def f_aB(self):
         """Compute f_aB."""
@@ -72,19 +71,19 @@ class Simulator(object):
         F0 = 1.0 / tau * (self.initial_speeds.unsqueeze(-1) * e - vel)
 
         # repulsive terms between pedestrians
-        F_pedped = None
-        f_pedped = self.f_pedped()
-        if f_pedped is not None:
-            w = self.w(e, -f_pedped).unsqueeze(-1)
-            F_pedped = w * f_pedped
+        F_ab = None
+        f_ab = self.f_ab()
+        if f_ab is not None:
+            w = self.w(e, -f_ab).unsqueeze(-1)
+            F_ab = w * f_ab
 
         # repulsive terms between pedestrians and boundaries
         F_aB = self.f_aB()
 
         # social force
         F = F0
-        if F_pedped is not None:
-            F += F_pedped
+        if F_ab is not None:
+            F += torch.sum(F_ab, dim=1)
         if F_aB is not None:
             F += torch.sum(F_aB, dim=1)
         # desired velocity
