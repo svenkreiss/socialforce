@@ -28,6 +28,20 @@ def canvas(image_file=None, **kwargs):
 
 
 @contextmanager
+def graph(image_file=None, **kwargs):
+    """Generic matplotlib context."""
+    fig, ax = plt.subplots(**kwargs)
+
+    yield ax
+
+    fig.set_tight_layout(True)
+    if image_file:
+        fig.savefig(image_file, dpi=300)
+    fig.show()
+    plt.close(fig)
+
+
+@contextmanager
 def animation(n, movie_file=None, writer=None, **kwargs):
     """Context for animations."""
     fig, ax = plt.subplots(**kwargs)

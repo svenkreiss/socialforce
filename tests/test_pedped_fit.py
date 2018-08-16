@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import pytest
 import torch
 import scipy.optimize
 import socialforce
@@ -86,29 +85,25 @@ def test_opposing_mlp():
     y_initial = V_initial.value_b(torch.from_numpy(b).float()).detach().numpy()
     y_mlp = V.value_b(torch.from_numpy(b).float()).detach().numpy()
 
-    fig, ax = plt.subplots()
-    ax.set_xlabel('$b$ [m]')
-    ax.set_ylabel('$V$')
-    ax.plot(b, y_ref, label=r'$V_0 e^{-b/\sigma}$')
-    ax.plot(b, y_initial, label=r'untrained MLP($b$)',
-            linestyle='dashed', color='black')
-    ax.plot(b, y_mlp, label=r'MLP($b$)')
-    ax.axvline(0.3, color='black', linestyle='dotted')
-    ax.legend()
-    fig.savefig('docs/mlp_v.png', dpi=300)
-    fig.show()
+    with socialforce.show.graph('docs/mlp_v.png') as ax:
+        ax.set_xlabel('$b$ [m]')
+        ax.set_ylabel('$V$')
+        ax.plot(b, y_ref, label=r'$V_0 e^{-b/\sigma}$', color='C0')
+        ax.axvline(0.3, color='black', linestyle='dotted', label=r'$\sigma$')
+        ax.plot(b, y_initial, label=r'untrained MLP($b$)',
+                linestyle='dashed', color='black')
+        ax.plot(b, y_mlp, label=r'MLP($b$)', color='orange')
+        ax.legend()
 
-    fig, ax = plt.subplots()
-    ax.set_xlabel(r'$b$ [m]')
-    ax.set_ylabel(r'$\nabla V$')
-    delta_b = b[1:] - b[:-1]
-    average_b = 0.5 * (b[:-1] + b[1:])
-    ax.plot(average_b, (y_ref[1:] - y_ref[:-1]) / delta_b, label=r'$V_0 e^{-b/\sigma}$')
-    ax.plot(average_b, (y_initial[1:] - y_initial[:-1]) / delta_b, label=r'untrained MLP($b$)',
-            linestyle='dashed', color='black')
-    ax.plot(average_b, (y_mlp[1:] - y_mlp[:-1]) / delta_b, label=r'MLP($b$)')
-    ax.axvline(0.3, color='black', linestyle='dotted')
-    ax.set_ylim(-4.9, 0.5)
-    ax.legend()
-    fig.savefig('docs/mlp_gradv.png', dpi=300)
-    fig.show()
+    with socialforce.show.graph('docs/mlp_gradv.png') as ax:
+        ax.set_xlabel(r'$b$ [m]')
+        ax.set_ylabel(r'$\nabla V$')
+        delta_b = b[1:] - b[:-1]
+        average_b = 0.5 * (b[:-1] + b[1:])
+        ax.plot(average_b, (y_initial[1:] - y_initial[:-1]) / delta_b, label=r'untrained MLP($b$)',
+                linestyle='dashed', color='black')
+        ax.plot(average_b, (y_mlp[1:] - y_mlp[:-1]) / delta_b, label=r'MLP($b$)', color='orange')
+        ax.plot(average_b, (y_ref[1:] - y_ref[:-1]) / delta_b, label=r'$V_0 e^{-b/\sigma}$', color='C0')
+        ax.axvline(0.3, color='black', linestyle='dotted', label=r'$\sigma$')
+        ax.set_ylim(-4.9, 0.5)
+        ax.legend()
