@@ -94,16 +94,43 @@ class PartialGradient(torch.autograd.Function):
 class PedPedPotentialMLP(object):
     """Ped-ped interaction potential."""
 
-    def __init__(self, delta_t, parameters):
+    def __init__(self, delta_t, hidden_units=5):
         self.delta_t = delta_t
+        self.hidden_units = hidden_units
 
-        lin1 = torch.nn.Linear(1, 5)
-        lin1.weight = torch.nn.Parameter(parameters[0][0])
-        lin1.bias = torch.nn.Parameter(parameters[0][1])
-        lin2 = torch.nn.Linear(5, 1)
-        lin2.weight = torch.nn.Parameter(parameters[1][0])
-        lin2.bias = torch.nn.Parameter(parameters[1][1])
-        self.mlp = torch.nn.Sequential(lin1, torch.nn.Tanh(), lin2)
+        self.lin1 = torch.nn.Linear(1, hidden_units)
+        self.lin2 = torch.nn.Linear(hidden_units, 1)
+
+        # fix the layers
+        self.lin1.weight.requires_grad_(False)
+        self.lin1.bias.requires_grad_(False)
+        self.lin2.weight.requires_grad_(False)
+        self.lin2.bias.requires_grad_(False)
+
+        # initialize
+        self.lin1.weight *= 0.1
+        self.lin1.bias *= 0.1
+        self.lin2.weight *= 0.1
+        self.lin2.bias[:] = 0.0
+
+        self.mlp = torch.nn.Sequential(self.lin1, torch.nn.Tanh(), self.lin2)
+
+    def get_parameters(self):
+        """Returns a single 1D array of parameters."""
+        return torch.cat((
+            self.lin1.weight.view(-1),
+            self.lin1.bias,
+            self.lin2.weight.view(-1),
+            self.lin2.bias,
+        ))
+
+    def set_parameters(self, parameters_1d):
+        """Set parameters of the MLP from the given 1D parameter tensor."""
+        i = 0
+        for p in (self.lin1.weight, self.lin1.bias, self.lin2.weight, self.lin2.bias):
+            n = p.nelement()
+            p[:] = parameters_1d[i:i + n].view(p.shape)
+            i += n
 
     def b(self, r_ab, speeds, desired_directions):
         """Calculate b."""

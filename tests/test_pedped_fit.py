@@ -33,6 +33,8 @@ def test_opposing():
 
 
 def test_opposing_mlp():
+    torch.manual_seed(42)
+
     initial_state = torch.tensor([
         [0.0, 0.0, 0.0, 1.0, 0.0, 10.0],
         [-0.3, 10.0, 0.0, -1.0, -0.3, 0.0],
@@ -40,19 +42,11 @@ def test_opposing_mlp():
     generator = socialforce.Simulator(initial_state)
     truth = torch.stack([generator.step().state[:, 0:2].clone() for _ in range(21)])
 
-    def potential(x):
-        lin1_weight = torch.from_numpy(x[0:5]).float().unsqueeze(1)
-        lin1_bias = torch.from_numpy(x[5:10]).float()
-        lin2_weight = torch.from_numpy(x[10:15]).float().unsqueeze(0)
-        lin2_bias = torch.from_numpy(x[15:16]).float()
-        return socialforce.PedPedPotentialMLP(0.4, [
-            (lin1_weight, lin1_bias),
-            (lin2_weight, lin2_bias),
-        ])
+    V = socialforce.PedPedPotentialMLP(0.4)
 
     # training
     def f(x):
-        V = potential(x)
+        V.set_parameters(torch.tensor(x))
         s = socialforce.Simulator(initial_state, None, V)
         g = torch.stack([s.step().state[:, 0:2].clone() for _ in range(21)])
 
@@ -66,23 +60,18 @@ def test_opposing_mlp():
 
         return float(loss)
 
-    np.random.seed(42)
-    parameters = np.concatenate((
-        np.random.rand(5) * 0.1,
-        np.zeros(5),
-        np.random.rand(5) * 0.1,
-        np.zeros(1),
-    ))
+    parameters = V.get_parameters().detach().numpy()
     initial_parameters = parameters.copy()
-    res = scipy.optimize.minimize(f, parameters, method='L-BFGS-B', options={'eps': 1e-4, 'gtol': 1e-4})
+    res = scipy.optimize.minimize(f, parameters, method='L-BFGS-B',
+                                  options={'eps': 1e-4, 'gtol': 1e-4})
     print(res)
 
-    # make a plot of result
-    V_initial = potential(initial_parameters)
-    V = potential(res.x)
+    # make plots of result
     b = np.linspace(0, 3)
     y_ref = 2.3 * np.exp(-1.0 * b / 0.3)
-    y_initial = V_initial.value_b(torch.from_numpy(b).float()).detach().numpy()
+    V.set_parameters(torch.tensor(initial_parameters))
+    y_initial = V.value_b(torch.from_numpy(b).float()).detach().numpy()
+    V.set_parameters(torch.tensor(res.x))
     y_mlp = V.value_b(torch.from_numpy(b).float()).detach().numpy()
 
     with socialforce.show.graph('docs/mlp_v.png') as ax:
