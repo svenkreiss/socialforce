@@ -74,19 +74,21 @@ class PedPedPotential(object):
 
         v = self.value_r_ab(r_ab, speeds, desired_directions)
         v.backward(torch.ones_like(v), retain_graph=True)
-        r_ab_grad = torch.autograd.grad(v, r_ab, torch.ones_like(v))
+        # r_ab_grad = torch.autograd.grad(v, r_ab, torch.ones_like(v))
         return r_ab.grad
         # v, r_ab_grad = PartialGradient().apply(v, r_ab)
         # return r_ab_grad
 
 
 class PartialGradient(torch.autograd.Function):
+    """Custom Autograd function that returns the gradient."""
+
     @classmethod
-    def forward(cls, ctx, v, r_ab):
+    def forward(cls, ctx, v, r_ab):  # pylint: disable=arguments-differ
         return v, r_ab.grad.detach()
 
     @staticmethod
-    def backward(ctx, grad_output, _):
+    def backward(ctx, grad_output, _):  # pylint: disable=arguments-differ
         # do nothing for now
         return grad_output.clone(), None
 

@@ -34,6 +34,7 @@ def test_opposing():
 
 def test_opposing_mlp():
     torch.manual_seed(42)
+    np.random.seed(42)
 
     initial_state = torch.tensor([
         [0.0, 0.0, 0.0, 1.0, 0.0, 10.0],
@@ -46,7 +47,7 @@ def test_opposing_mlp():
 
     # training
     def f(x):
-        V.set_parameters(torch.tensor(x))
+        V.set_parameters(torch.from_numpy(x))
         s = socialforce.Simulator(initial_state, None, V)
         g = torch.stack([s.step().state[:, 0:2].clone() for _ in range(21)])
 
@@ -89,10 +90,13 @@ def test_opposing_mlp():
         ax.set_ylabel(r'$\nabla V$')
         delta_b = b[1:] - b[:-1]
         average_b = 0.5 * (b[:-1] + b[1:])
-        ax.plot(average_b, (y_initial[1:] - y_initial[:-1]) / delta_b, label=r'untrained MLP($b$)',
+        ax.plot(average_b, (y_initial[1:] - y_initial[:-1]) / delta_b,
+                label=r'untrained MLP($b$)',
                 linestyle='dashed', color='black')
-        ax.plot(average_b, (y_mlp[1:] - y_mlp[:-1]) / delta_b, label=r'MLP($b$)', color='orange')
-        ax.plot(average_b, (y_ref[1:] - y_ref[:-1]) / delta_b, label=r'$V_0 e^{-b/\sigma}$', color='C0')
+        ax.plot(average_b, (y_mlp[1:] - y_mlp[:-1]) / delta_b,
+                label=r'MLP($b$)', color='orange')
+        ax.plot(average_b, (y_ref[1:] - y_ref[:-1]) / delta_b,
+                label=r'$V_0 e^{-b/\sigma}$', color='C0')
         ax.axvline(0.3, color='black', linestyle='dotted', label=r'$\sigma$')
         ax.set_ylim(-4.9, 0.5)
         ax.legend()
