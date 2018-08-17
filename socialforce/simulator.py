@@ -64,6 +64,8 @@ class Simulator(object):
 
     def step(self):
         """Do one step in the simulation and update the state in place."""
+        self.state = self.state.detach()
+
         # accelerate to desired velocity
         e = stateutils.desired_directions(self.state)
         vel = self.state[:, 2:4]
