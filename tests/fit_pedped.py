@@ -30,10 +30,10 @@ def visualize(file_prefix, V, initial_parameters, final_parameters, fit_result=N
     with socialforce.show.graph(file_prefix + 'v.png') as ax:
         ax.set_xlabel('$b$ [m]')
         ax.set_ylabel('$V$')
-        ax.plot(b, y_ref, label=r'$V_0 e^{-b/\sigma}$', color='C0')
-        ax.axvline(0.3, color='black', linestyle='dotted', label=r'$\sigma$')
+        ax.plot(b, y_ref, label=r'true $V_0 e^{-b/\sigma}$', color='C0')
+        ax.axvline(0.3, color='C0', linestyle='dotted', label=r'true $\sigma$')
         ax.plot(b, y_initial, label=r'untrained MLP($b$)',
-                linestyle='dashed', color='black')
+                linestyle='dashed', color='orange')
         ax.plot(b, y_mlp, label=r'MLP($b$)', color='orange')
         ax.legend()
 
@@ -42,14 +42,14 @@ def visualize(file_prefix, V, initial_parameters, final_parameters, fit_result=N
         ax.set_ylabel(r'$\nabla V$')
         delta_b = b[1:] - b[:-1]
         average_b = 0.5 * (b[:-1] + b[1:])
+        ax.plot(average_b, (y_ref[1:] - y_ref[:-1]) / delta_b,
+                label=r'true $V_0 e^{-b/\sigma}$', color='C0')
+        ax.axvline(0.3, color='C0', linestyle='dotted', label=r'true $\sigma$')
         ax.plot(average_b, (y_initial[1:] - y_initial[:-1]) / delta_b,
                 label=r'untrained MLP($b$)',
-                linestyle='dashed', color='black')
+                linestyle='dashed', color='orange')
         ax.plot(average_b, (y_mlp[1:] - y_mlp[:-1]) / delta_b,
                 label=r'MLP($b$)', color='orange')
-        ax.plot(average_b, (y_ref[1:] - y_ref[:-1]) / delta_b,
-                label=r'$V_0 e^{-b/\sigma}$', color='C0')
-        ax.axvline(0.3, color='black', linestyle='dotted', label=r'$\sigma$')
         ax.set_ylim(-4.9, 0.5)
         ax.legend()
 
