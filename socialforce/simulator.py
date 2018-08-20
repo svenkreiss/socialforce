@@ -64,7 +64,7 @@ class Simulator(object):
 
     def step(self):
         """Do one step in the simulation and update the state in place."""
-        self.state = self.state.detach()
+        self.state = self.state.clone().detach()
 
         # accelerate to desired velocity
         e = stateutils.desired_directions(self.state)
@@ -88,6 +88,10 @@ class Simulator(object):
             F += torch.sum(F_ab, dim=1)
         if F_aB is not None:
             F += torch.sum(F_aB, dim=1)
+
+        # before applying updates to state, make a copy of it
+        self.state = self.state.clone().detach()
+
         # desired velocity
         w = self.state[:, 2:4] + self.delta_t * F
         # velocity

@@ -1,3 +1,6 @@
+# Temp data
+circle_parameters*.pkl
+
 # Python
 venv*/
 *.egg-info/
