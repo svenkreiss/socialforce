@@ -11,9 +11,11 @@ import socialforce
 OPTIMIZER_OPT = {'eps': 1e-4, 'gtol': 1e-4, 'maxcor': 30, 'maxls': 10, 'disp': True}
 
 
-def visualize(file_prefix, V, initial_parameters, final_parameters, fit_result=None):
+def visualize(file_prefix, V, initial_parameters, final_parameters, fit_result=None, V_gen=None):
     b = np.linspace(0, 3, 200)
     y_ref = 2.1 * np.exp(-1.0 * b / 0.3)
+    if V_gen is not None:
+        y_ref = V_gen.v0 * np.exp(-1.0 * b / V_gen.sigma)
 
     V.set_parameters(torch.tensor(initial_parameters))
     y_initial = V.value_b(torch.from_numpy(b).float()).detach().numpy()
@@ -213,9 +215,11 @@ def test_circle_mlp(n, lr=0.3):
             [-0.3, 10.0, 0.0, -1.0, -0.3, 0.0],
         ])]
 
+    generator_v0 = 1.5 if n != 1 else 2.1
+    generator_ped_ped = socialforce.PedPedPotential(0.4, generator_v0)
     Y = []
     for x in X:
-        generator = socialforce.Simulator(x)
+        generator = socialforce.Simulator(x, None, generator_ped_ped)
         Y.append(
             torch.stack([generator.step().state[:, 0:2].clone() for _ in range(21)]).detach()
         )
@@ -255,4 +259,4 @@ def test_circle_mlp(n, lr=0.3):
         torch.save(V.get_parameters(), f)
 
     # make plots of result
-    visualize('docs/mlp_circle_n{}_'.format(n), V, initial_parameters, V.get_parameters().clone())
+    visualize('docs/mlp_circle_n{}_'.format(n), V, initial_parameters, V.get_parameters().clone(), V_gen=generator_ped_ped)
