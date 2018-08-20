@@ -255,8 +255,9 @@ def test_circle_mlp(n, lr=0.3):
         print('epoch {}/{}: loss = {}'.format(epoch, max_epochs, epoch_loss))
 
     # save result
-    with open('circle_parameters_n{}.pkl'.format(n), 'wb') as f:
-        torch.save(V.get_parameters(), f)
+    if n == 1:
+        with open('circle_parameters_n{}.pkl'.format(n), 'wb') as f:
+            torch.save(V.get_parameters(), f)
 
     # make plots of result
     visualize('docs/mlp_circle_n{}_'.format(n), V, initial_parameters, V.get_parameters().clone(), V_gen=generator_ped_ped)

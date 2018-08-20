@@ -147,7 +147,7 @@ class PedPedPotentialMLP(PedPedPotential):
         # modified_b = 3.0 - b
         # modified_b[torch.eye(modified_b.shape[0], dtype=torch.uint8)] = 0.0
         # print('b', b)
-        b = torch.clamp(b, max=10.0)
+        b = torch.clamp(b, max=100.0)
         v = self.mlp(b.view(-1, 1)).view(b.shape)
         # v[torch.eye(v.shape[0], dtype=torch.uint8)] = 0.0
         # print(b, v)
