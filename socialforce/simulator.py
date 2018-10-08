@@ -26,9 +26,9 @@ class Simulator(object):
     delta_t in seconds.
     tau in seconds: either float or numpy array of shape[n_ped].
     """
-    def __init__(self, initial_state, ped_space=None, delta_t=0.4, tau=0.5):
+    def __init__(self, initial_state, ped_space=None, delta_t=0.4, tau=0.5, initial_speed=1.0, v0=2.1, sigma=0.3):
         self.state = initial_state
-        self.initial_speeds = stateutils.speeds(initial_state)
+        self.initial_speeds = np.ones((initial_state.shape[0])) * initial_speed
         self.max_speeds = MAX_SPEED_MULTIPLIER * self.initial_speeds
 
         self.delta_t = delta_t
@@ -39,7 +39,7 @@ class Simulator(object):
             self.state = np.concatenate((self.state, np.expand_dims(tau, -1)), axis=-1)
 
         # potentials
-        self.V = PedPedPotential(self.delta_t)
+        self.V = PedPedPotential(self.delta_t, v0=v0, sigma=sigma)
         self.U = ped_space
 
         # field of view
