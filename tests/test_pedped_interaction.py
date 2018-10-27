@@ -48,10 +48,13 @@ def test_b_zero_vel():
     speeds = torch.tensor([0.0, 0.0])
     desired_directions = torch.tensor([[1.0, 0.0], [-1.0, 0.0]])
     V = socialforce.PedPedPotential(0.4)
-    assert V.b(r_ab, speeds, desired_directions).tolist() == [
-        [0.0, 1.0],
-        [1.0, 0.0],
-    ]
+
+    # due to clipping for stability, a zero is clipped to 1e-8 which
+    # is returned as 0.5 * sqrt(1e-8):
+    assert V.b(r_ab, speeds, desired_directions).numpy() == pytest.approx(np.array([
+        [0.00005, 1.0],
+        [1.0, 0.00005],
+    ]), abs=0.0001)
 
 
 def test_torch_potential_gradient():

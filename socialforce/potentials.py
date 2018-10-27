@@ -31,11 +31,11 @@ class PedPedPotential(object):
         )**2 - (self.delta_t * speeds_b)**2
 
         # in_sqrt[torch.eye(in_sqrt.shape[0], dtype=torch.uint8)] = 0.0  # protect forward pass
-        in_sqrt = torch.clamp(in_sqrt, min=0.0000001)
+        in_sqrt = torch.clamp(in_sqrt, min=1e-8)
         out = 0.5 * torch.sqrt(in_sqrt)
         # out[torch.eye(out.shape[0], dtype=torch.uint8)] = 0.0  # protect backward pass
 
-        return 0.5 * out
+        return out
 
     def value_b(self, b):
         """Value of potential parametrized with b."""
@@ -96,7 +96,7 @@ class PedPedPotential(object):
         Without this treatment, backpropagating through a norm of a
         zero vector gives nan gradients.
         """
-        out = torch.norm(r_ab, dim=-1, keepdim=True).clone()
+        out = torch.norm(r_ab, dim=-1, keepdim=False).clone()
         out[torch.eye(out.shape[0], dtype=torch.uint8)] = 0.0
         return out
 

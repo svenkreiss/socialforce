@@ -7,9 +7,7 @@ Social Force Model
 
 .. code-block::
 
-    Social force model for pedestrian dynamics
-    Dirk Helbing and Péter Molnár
-    Phys. Rev. E 51, 4282 – Published 1 May 1995
+    citation coming soon ...
 
 
 Install and Run
@@ -25,7 +23,7 @@ Install and Run
 
     # run linting and tests
     pylint socialforce
-    pytest tests/*.py
+    pytest tests/*.py  # scenarios_*.py files will create plots
 
 
 Ped-Ped-Space Scenarios

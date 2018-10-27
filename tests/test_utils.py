@@ -32,7 +32,7 @@ def test_product():
 def test_norm():
     a = torch.tensor(1.0, requires_grad=True)
     x = torch.tensor([[
-        [0.0, 0.0],
+        [1.0, 0.0],
     ]], requires_grad=True)
     y = a * torch.norm(x, dim=-1, keepdim=True)
     print(y)
@@ -41,7 +41,7 @@ def test_norm():
 
     grad_ya, = torch.autograd.grad(grad_y.sum(), a)
     print('grad_ya', grad_ya)
-    assert grad_ya == 6.0
+    assert grad_ya == 1.0
 
 
 def test_mlp_bias():
