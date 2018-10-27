@@ -22,7 +22,7 @@ def canvas(image_file=None, **kwargs):
 
     fig.set_tight_layout(True)
     if image_file:
-        fig.savefig(image_file, dpi=300)
+        fig.savefig(image_file, dpi=200)
     fig.show()
     plt.close(fig)
 
@@ -36,7 +36,7 @@ def graph(image_file=None, **kwargs):
 
     fig.set_tight_layout(True)
     if image_file:
-        fig.savefig(image_file, dpi=300)
+        fig.savefig(image_file, dpi=200)
     fig.show()
     plt.close(fig)
 
@@ -50,7 +50,7 @@ def animation(n, movie_file=None, writer=None, **kwargs):
     ax.set_aspect(1.0, 'datalim')
     ax.set_axisbelow(True)
 
-    context = {'ax': ax, 'update_function': None}
+    context = {'fig': fig, 'ax': ax, 'update_function': None}
     yield context
 
     ani = mpl_animation.FuncAnimation(fig, context['update_function'], range(n))
