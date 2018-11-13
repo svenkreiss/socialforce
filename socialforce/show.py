@@ -17,6 +17,8 @@ def canvas(image_file=None, **kwargs):
     ax.grid(linestyle='dotted')
     ax.set_aspect(1.0, 'datalim')
     ax.set_axisbelow(True)
+    ax.set_xlabel('x [m]')
+    ax.set_ylabel('y [m]')
 
     yield ax
 
