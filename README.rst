@@ -23,7 +23,14 @@ Install and Run
 
     # run linting and tests
     pylint socialforce
-    pytest tests/*.py  # scenarios_*.py files will create plots
+    pytest tests/*.py
+
+    # plots of simulations
+    pytest -s tests/scenarios_*.py
+
+    # run fits and create plots
+    pytest -s tests/fit_pedped.py::test_opposing_mlp
+    pytest -s tests/fit_pedped.py::test_circle_mlp
 
 
 Ped-Ped-Space Scenarios
