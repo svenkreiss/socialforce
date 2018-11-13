@@ -32,7 +32,7 @@ def visualize(file_prefix, V, initial_parameters, final_parameters, fit_result=N
         ax.set_ylabel('$V$')
         ax.plot(b, y_ref, label=r'true $V_0 e^{-b/\sigma}$', color='C0')
         ax.axvline(0.3, color='C0', linestyle='dotted', label=r'true $\sigma$')
-        ax.plot(b, y_initial, label=r'untrained MLP($b$)',
+        ax.plot(b, y_initial, label=r'initial MLP($b$)',
                 linestyle='dashed', color='orange')
         ax.plot(b, y_mlp, label=r'MLP($b$)', color='orange')
         ax.legend()
@@ -46,7 +46,7 @@ def visualize(file_prefix, V, initial_parameters, final_parameters, fit_result=N
                 label=r'true $V_0 e^{-b/\sigma}$', color='C0')
         ax.axvline(0.3, color='C0', linestyle='dotted', label=r'true $\sigma$')
         ax.plot(average_b, (y_initial[1:] - y_initial[:-1]) / delta_b,
-                label=r'untrained MLP($b$)',
+                label=r'initial MLP($b$)',
                 linestyle='dashed', color='orange')
         ax.plot(average_b, (y_mlp[1:] - y_mlp[:-1]) / delta_b,
                 label=r'MLP($b$)', color='orange')
@@ -116,36 +116,40 @@ def test_opposing_scipy():
     assert res.x == pytest.approx(np.array([2.1, 0.3]), abs=0.01)
 
 
-def test_opposing_mlp(lr=0.3):
+def test_opposing_mlp(lr=0.3, delta_t=0.2):
     torch.manual_seed(42)
 
     initial_state = torch.tensor([
         [0.0, 0.0, 0.0, 1.0, 0.0, 10.0],
         [-0.3, 10.0, 0.0, -1.0, -0.3, 0.0],
     ])
-    generator = socialforce.Simulator(initial_state)
-    truth = torch.stack([generator.step().state[:, 0:2].clone() for _ in range(21)]).detach()
+    generator = socialforce.Simulator(initial_state, delta_t=delta_t)
+    truth = torch.stack([generator.step().state.clone() for _ in range(42)]).detach()
 
     print('============DONE WITH GENERATION===============')
 
-    V = socialforce.PedPedPotentialMLP(0.4)
+    V = socialforce.PedPedPotentialMLP(delta_t)
     initial_parameters = V.get_parameters().clone().detach().numpy()
     parameters = V.parameters()
 
     # training
-    for _ in range(300):
-        s = socialforce.Simulator(initial_state, None, V)
-        g = torch.stack([s.step().state[:, 0:2].clone() for _ in range(21)])
+    for i in range(3000):
+        initial_step = i % (truth.shape[0] - 1)
+        s_initial_state = truth[initial_step]
+        s = socialforce.Simulator(s_initial_state, ped_ped=V, delta_t=delta_t)
+        g = s.step().state.clone()
 
         # average euclidean distance loss
-        loss = (g - truth).pow(2).sum()
+        loss = ((g[:, :2] - truth[initial_step + 1, :, :2]) * 10.0).pow(2).sum()
+        # print('loss', i, loss)
 
         p_grads = torch.autograd.grad(loss, parameters)
-        print('p grads', p_grads)
+        # print('p grads', p_grads)
 
         with torch.no_grad():
             for p, p_grad in zip(parameters, p_grads):
                 p -= lr * p_grad
+                # print('p', p)
 
     # make plots of result
     visualize('docs/mlp_', V, initial_parameters, V.get_parameters().clone())
