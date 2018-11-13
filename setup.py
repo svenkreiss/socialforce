@@ -13,7 +13,7 @@ setup(
         'socialforce',
     ],
     license='MIT',
-    description='PyTorch implementation of the Social Force model.',
+    description='PyTorch implementation of the Non-parametric Social Force model.',
     long_description=open('README.rst').read(),
     author='Sven Kreiss',
     author_email='me@svenkreiss.com',
@@ -30,6 +30,7 @@ setup(
         ],
         'plot': [
             'matplotlib',
+            'scipy',
         ],
     },
 
