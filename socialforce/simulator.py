@@ -28,8 +28,8 @@ class Simulator(object):
     """
     def __init__(self, initial_state, ped_space=None, ped_ped=None, delta_t=0.4, tau=0.5):
         self.state = initial_state
-        self.initial_speeds = stateutils.speeds(initial_state)
-        self.max_speeds = MAX_SPEED_MULTIPLIER * self.initial_speeds
+        self.desired_speeds = stateutils.speeds(initial_state)
+        self.max_speeds = MAX_SPEED_MULTIPLIER * self.desired_speeds
 
         self.delta_t = delta_t
 
@@ -70,7 +70,7 @@ class Simulator(object):
         e = stateutils.desired_directions(self.state)
         vel = self.state[:, 2:4]
         tau = self.state[:, 6:7]
-        F0 = 1.0 / tau * (self.initial_speeds.unsqueeze(-1) * e - vel)
+        F0 = 1.0 / tau * (self.desired_speeds.unsqueeze(-1) * e - vel)
 
         # repulsive terms between pedestrians
         F_ab = None

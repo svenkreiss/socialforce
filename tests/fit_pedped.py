@@ -116,35 +116,6 @@ def test_opposing_scipy():
     assert res.x == pytest.approx(np.array([2.1, 0.3]), abs=0.01)
 
 
-def test_opposing_mlp(lr=0.3, delta_t=0.2):
-    torch.manual_seed(42)
-
-    initial_state = torch.tensor([
-        [0.0, 0.0, 0.0, 1.0, 0.0, 10.0],
-        [-0.3, 10.0, 0.0, -1.0, -0.3, 0.0],
-    ])
-    generator = socialforce.Simulator(initial_state, delta_t=delta_t)
-    true_scenes = [
-        [generator.step().state.clone().detach() for _ in range(42)]
-    ]
-    true_experience = socialforce.Optimizer.scenes_to_experience(true_scenes)
-
-    print('============DONE WITH GENERATION===============')
-
-    V = socialforce.PedPedPotentialMLP(delta_t)
-    initial_parameters = V.get_parameters().clone().detach().numpy()
-    parameters = V.parameters()
-
-    s = socialforce.Simulator(true_experience[0][0], ped_ped=V, delta_t=delta_t)
-    opt = socialforce.Optimizer(s, parameters, true_experience)
-    for i in range(100):
-        loss = opt.epoch()
-        print('epoch {}: {}'.format(i, loss))
-
-    # make plots of result
-    visualize('docs/mlp_', V, initial_parameters, V.get_parameters().clone())
-
-
 def test_opposing_mlp_scipy():
     torch.manual_seed(42)
     np.random.seed(42)
@@ -183,75 +154,57 @@ def test_opposing_mlp_scipy():
 
 
 @pytest.mark.parametrize('n', [1, 5, 20])
-def test_circle_mlp(n, lr=0.3):
+def test_circle_mlp(n, lr=0.1, delta_t=0.2):
     torch.manual_seed(42)
     np.random.seed(42)
 
     # ped0 always left to right
     ped0 = np.array([-5.0, 0.0, 1.0, 0.0, 5.0, 0.0])
 
-    X = []
+    generator_initial_states = []
     for theta in np.random.rand(n) * 2.0 * math.pi:
         # ped1 at a random angle with +/-20% speed variation
         c, s = np.cos(theta), np.sin(theta)
         r = np.array([[c, -s], [s, c]])
         ped1 = np.concatenate((
             np.matmul(r, ped0[0:2]),
-            np.matmul(r, ped0[2:4] * (0.8 + random.random() * 0.4)),
+            np.matmul(r, ped0[2:4]),  # * (0.8 + random.random() * 0.4)),
             np.matmul(r, ped0[4:6]),
         ))
-        X.append(
+        generator_initial_states.append(
             torch.tensor(np.stack((ped0, ped1))).float()
         )
     if n == 1:  # override for n=1
-        X = [torch.tensor([
+        generator_initial_states = [torch.tensor([
             [0.0, 0.0, 0.0, 1.0, 0.0, 10.0],
             [-0.3, 10.0, 0.0, -1.0, -0.3, 0.0],
         ])]
 
-    generator_v0 = 1.5 if n != 1 else 2.1
-    generator_ped_ped = socialforce.PedPedPotential(0.4, generator_v0)
-    Y = []
-    for x in X:
-        generator = socialforce.Simulator(x, None, generator_ped_ped)
-        Y.append(
-            torch.stack([generator.step().state[:, 0:2].clone() for _ in range(21)]).detach()
+    # generator_v0 = 1.5 if n != 1 else 2.1
+    generator_ped_ped = socialforce.PedPedPotential(delta_t, 2.1)
+    true_scenes = []
+    for initial_state in generator_initial_states:
+        generator = socialforce.Simulator(initial_state, ped_ped=generator_ped_ped, delta_t=delta_t)
+        true_scenes.append(
+            [generator.step().state.clone().detach() for _ in range(42)]
         )
+    true_experience = socialforce.Optimizer.scenes_to_experience(true_scenes)
 
     print('============DONE WITH GENERATION===============')
 
-    V = socialforce.PedPedPotentialMLP(0.4)
-    if n > 1:
-        with open('circle_parameters_n1.pkl', 'rb') as f:
-            V.set_parameters(torch.load(f))
+    V = socialforce.PedPedPotentialMLP(delta_t)
     initial_parameters = V.get_parameters().clone().detach().numpy()
-    parameters = V.parameters()
 
-    # training
-    max_epochs = int(500 / n)
-    for epoch in range(max_epochs):
-        epoch_loss = 0.0
-        train = list(zip(X, Y))
-        random.shuffle(train)
-        for x, y in train:
-            s = socialforce.Simulator(x, None, V)
-            g = torch.stack([s.step().state[:, 0:2].clone() for _ in range(21)])
-            loss = (g - y).pow(2).sum()
-            # print('loss', loss)
-            epoch_loss += loss
+    def simulator_factory(initial_state):
+        s = socialforce.Simulator(initial_state, ped_ped=V, delta_t=delta_t)
+        s.desired_speeds = generator.desired_speeds
+        s.max_speeds = generator.max_speeds
+        return s
 
-            p_grads = torch.autograd.grad(loss, parameters)
-            # print('p grads', p_grads)
-
-            with torch.no_grad():
-                for p, p_grad in zip(parameters, p_grads):
-                    p -= lr * p_grad
-        print('epoch {}/{}: loss = {}'.format(epoch, max_epochs, epoch_loss))
-
-    # save result
-    if n == 1:
-        with open('circle_parameters_n{}.pkl'.format(n), 'wb') as f:
-            torch.save(V.get_parameters(), f)
+    opt = socialforce.Optimizer(simulator_factory, V.parameters(), true_experience)
+    for i in range(100 // n):
+        loss = opt.epoch()
+        print('epoch {}: {}'.format(i, loss))
 
     # make plots of result
     visualize('docs/mlp_circle_n{}_'.format(n), V, initial_parameters, V.get_parameters().clone(), V_gen=generator_ped_ped)
