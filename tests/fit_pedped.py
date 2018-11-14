@@ -124,7 +124,10 @@ def test_opposing_mlp(lr=0.3, delta_t=0.2):
         [-0.3, 10.0, 0.0, -1.0, -0.3, 0.0],
     ])
     generator = socialforce.Simulator(initial_state, delta_t=delta_t)
-    truth = torch.stack([generator.step().state.clone() for _ in range(42)]).detach()
+    true_scenes = [
+        [generator.step().state.clone().detach() for _ in range(42)]
+    ]
+    true_experience = socialforce.Optimizer.scenes_to_experience(true_scenes)
 
     print('============DONE WITH GENERATION===============')
 
@@ -132,24 +135,11 @@ def test_opposing_mlp(lr=0.3, delta_t=0.2):
     initial_parameters = V.get_parameters().clone().detach().numpy()
     parameters = V.parameters()
 
-    # training
-    for i in range(3000):
-        initial_step = i % (truth.shape[0] - 1)
-        s_initial_state = truth[initial_step]
-        s = socialforce.Simulator(s_initial_state, ped_ped=V, delta_t=delta_t)
-        g = s.step().state.clone()
-
-        # average euclidean distance loss
-        loss = ((g[:, :2] - truth[initial_step + 1, :, :2]) * 10.0).pow(2).sum()
-        # print('loss', i, loss)
-
-        p_grads = torch.autograd.grad(loss, parameters)
-        # print('p grads', p_grads)
-
-        with torch.no_grad():
-            for p, p_grad in zip(parameters, p_grads):
-                p -= lr * p_grad
-                # print('p', p)
+    s = socialforce.Simulator(true_experience[0][0], ped_ped=V, delta_t=delta_t)
+    opt = socialforce.Optimizer(s, parameters, true_experience)
+    for i in range(100):
+        loss = opt.epoch()
+        print('epoch {}: {}'.format(i, loss))
 
     # make plots of result
     visualize('docs/mlp_', V, initial_parameters, V.get_parameters().clone())
