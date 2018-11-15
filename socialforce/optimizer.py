@@ -43,8 +43,8 @@ class Optimizer(object):
             Y = torch.stack([e[1] for e in data])
             X = torch.stack([self.sim_step(e[0]) for e in data])
 
-            # loss = ((Y[:, :2] - X[:, :2]) * 10.0).pow(2).mean()
-            loss = self.loss(X[:, :2] * 10.0, Y[:, :2] * 10.0)
+            # loss = ((Y[:, :, :2] - X[:, :, :2]) * 10.0).pow(2).mean()
+            loss = self.loss(X[:, :, :2] * 10.0, Y[:, :, :2] * 10.0)
 
             epoch_loss += float(loss.item())
             n_batches += 1
