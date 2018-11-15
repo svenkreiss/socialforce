@@ -42,6 +42,7 @@ def test_narrow_crossing():
             y = states[:, ped, 1]
             ax.plot(x, y, '-o', label='ped {}'.format(ped), markersize=2.5)
         ax.legend()
+        ax.set_xlim(-0.3, 3.5)
 
 
 def test_opposing():
@@ -66,6 +67,7 @@ def test_opposing():
             y = states[:, ped, 1]
             ax.plot(x, y, '-o', label='ped {}'.format(ped), markersize=2.5)
         ax.legend()
+        ax.set_xlim(-1.2, 3.5)
 
 
 def test_2opposing():
