@@ -88,7 +88,8 @@ class PedPedPotential(object):
         r_ab_grad, = torch.autograd.grad(v, r_ab, torch.ones_like(v), create_graph=True)
         return r_ab_grad
 
-    def norm_r_ab(self, r_ab):
+    @staticmethod
+    def norm_r_ab(r_ab):
         """Norm of r_ab.
 
         Special treatment of diagonal terms for backpropagation.

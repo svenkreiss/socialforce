@@ -1,7 +1,8 @@
 import argparse
 import numpy as np
-import trajnettools
 import torch
+
+import trajnettools
 
 from .optimizer import Optimizer
 from .potentials import PedPedPotentialMLP
@@ -15,9 +16,7 @@ def cli():
     return parser.parse_args()
 
 
-def main():
-    args = cli()
-
+def generate_experience(args):
     experience = []
     for _, scene in trajnettools.load_all(args.data):
         # scene is of the form [frame, ped, xy]
@@ -41,6 +40,13 @@ def main():
 
     print('============DONE WITH GENERATION===============')
 
+    return experience
+
+
+def main():
+    args = cli()
+    experience = generate_experience(args)
+
     V = PedPedPotentialMLP(delta_t=0.4)
     # initial_parameters = V.get_parameters().clone().detach().numpy()
 
@@ -53,7 +59,8 @@ def main():
         print('epoch {}: {}'.format(i, loss))
 
     # make plots of result
-    # visualize('docs/mlp_circle_n{}_'.format(n), V, initial_parameters, V.get_parameters().clone(), V_gen=generator_ped_ped)
+    # visualize('docs/mlp_circle_n{}_'.format(n), V, initial_parameters,
+    #           V.get_parameters().clone(), V_gen=generator_ped_ped)
 
 
 if __name__ == '__main__':

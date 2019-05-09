@@ -1,5 +1,6 @@
-# Temp data
+# data
 circle_parameters*.pkl
+trajnet/
 
 # Python
 venv*/
