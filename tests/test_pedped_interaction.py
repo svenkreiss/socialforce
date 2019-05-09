@@ -1,9 +1,10 @@
 import math
 import pytest
 import torch
-import socialforce
 
 import numpy as np
+
+import socialforce
 
 
 def test_rab():
