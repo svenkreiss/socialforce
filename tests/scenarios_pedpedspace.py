@@ -78,23 +78,42 @@ def test_separator():
 
 
 @pytest.mark.plot
-def test_gate():
+def test_gate(gate_width=1.4):
+    torch.manual_seed(42)
+
     initial_state = torch.tensor([
-        [-9.0 - 2.0 * random.random(), -0.5 + random.random(), 1.0, 0.0, 5.0, 0.0]
+        [-10.0 - 2.0 * random.random(), -0.5 + random.random(), 1.0, 0.0, 0.1, 0.0]
         for _ in range(20)
     ] + [
-        [10.0 + 2.0 * random.random(), -0.5 + random.random(), -1.0, 0.0, -5.0, 0.0]
+        [10.0 + 2.0 * random.random(), -0.5 + random.random(), -1.0, 0.0, -0.1, 0.0]
         for _ in range(20)
     ])
+    # randomize desired x-speed
+    initial_state[:, 2] = torch.normal(initial_state[:, 2], 0.26)
+
     space = [
-        torch.tensor([(0.0, y) for y in np.linspace(-5.0, -0.7, 1000)]),
-        torch.tensor([(0.0, y) for y in np.linspace(0.7, 5.0, 1000)]),
+        torch.tensor([(0.0, y) for y in np.linspace(-5.0, -gate_width/2.0, 500)]),
+        torch.tensor([(0.0, y) for y in np.linspace(gate_width/2.0, 5.0, 500)]),
         torch.tensor([(x, -5.0) for x in np.linspace(-10, 10, 1000)]),
         torch.tensor([(x, 5.0) for x in np.linspace(-10, 10, 1000)]),
     ]
-    s = socialforce.Simulator(initial_state, socialforce.PedSpacePotential(space), delta_t=0.2)
-    states = torch.stack([s.step().state.clone() for _ in range(150)])
+    s = socialforce.Simulator(initial_state, socialforce.PedSpacePotential(space), delta_t=0.04)
+    states = []
+    for step_i in range(1000):
+        state = s.step().state
+        # first target is not a point but a line spanning the gate
+        state[:, 5] = torch.clamp(state[:, 1], -gate_width/4.0, gate_width/4.0)
+        # move target once through gate
+        state[(state[:, 4] > 0.0) & (state[:, 0] > 0.0), 4] = 5.0
+        state[(state[:, 4] < 0.0) & (state[:, 0] < 0.0), 4] = -5.0
 
+        if step_i % 10 == 0:  # only add every 4th frame to gif
+            states.append(state.clone())
+
+        if step_i % 100 == 0:
+            print('step', step_i)
+
+    states = torch.stack(states)
     with visualize(states, space, 'docs/gate.gif', frames=[75]) as ax:
         ax.set_xlim(-10, 10)
 
@@ -103,8 +122,8 @@ def test_gate():
 def test_walkway(n):
     torch.manual_seed(42)
 
-    pos_left = ((torch.rand((n, 2)) - 0.5) * 2.0) * torch.tensor([25.0, 5.0])
-    pos_right = ((torch.rand((n, 2)) - 0.5) * 2.0) * torch.tensor([25.0, 5.0])
+    pos_left = ((torch.rand((n, 2)) - 0.5) * 2.0) * torch.tensor([25.0, 4.5])
+    pos_right = ((torch.rand((n, 2)) - 0.5) * 2.0) * torch.tensor([25.0, 4.5])
 
     ones = torch.ones((n, 1))
     zeros = torch.zeros((n, 1))
@@ -121,19 +140,23 @@ def test_walkway(n):
     initial_state = torch.cat((state_left, state_right))
 
     space = [
-        torch.tensor([(x, 5) for x in np.linspace(-30, 30, num=5000)]),
-        torch.tensor([(x, -5) for x in np.linspace(-30, 30, num=5000)]),
+        torch.tensor([(x, 5) for x in np.linspace(-30, 30, num=600)]),
+        torch.tensor([(x, -5) for x in np.linspace(-30, 30, num=600)]),
     ]
-    s = socialforce.Simulator(initial_state, socialforce.PedSpacePotential(space), delta_t=0.2)
+    s = socialforce.Simulator(initial_state, socialforce.PedSpacePotential(space), delta_t=0.04)
     states = []
-    for _ in range(1000):
+    for step_i in range(5000):
         state = s.step().state
         # periodic boundary conditions
         state[state[:, 0] > 25, 0] -= 50
         state[state[:, 0] < -25, 0] += 50
 
-        states.append(state.clone())
-    states = torch.stack(states)[::4]  # only add every 4th frame to gif
+        if step_i % 10 == 0:  # only add every 4th frame to gif
+            states.append(state.clone())
 
+        if step_i % 100 == 0:
+            print('step', step_i, n)
+
+    states = torch.stack(states)
     with visualize(states, space, 'docs/walkway_{}.gif'.format(n), frames=[200]) as ax:
         ax.set_xlim(-25, 25)
