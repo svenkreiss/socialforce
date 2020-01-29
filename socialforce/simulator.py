@@ -26,7 +26,9 @@ class Simulator(object):
     delta_t in seconds.
     tau in seconds: either float or numpy array of shape[n_ped].
     """
-    def __init__(self, initial_state, ped_space=None, delta_t=0.4, tau=0.5):
+    def __init__(self, initial_state, ped_space=None, delta_t=0.4, tau=0.5,
+                 v0=2.1, sigma=0.3,
+                 twophi=200.0, out_of_view_factor=0.5):
         self.state = initial_state
         self.initial_speeds = stateutils.speeds(initial_state)
         self.max_speeds = MAX_SPEED_MULTIPLIER * self.initial_speeds
@@ -39,11 +41,11 @@ class Simulator(object):
             self.state = np.concatenate((self.state, np.expand_dims(tau, -1)), axis=-1)
 
         # potentials
-        self.V = PedPedPotential(self.delta_t)
+        self.V = PedPedPotential(self.delta_t, v0, sigma)
         self.U = ped_space
 
         # field of view
-        self.w = FieldOfView()
+        self.w = FieldOfView(twophi, out_of_view_factor)
 
     def f_ab(self):
         """Compute f_ab."""
@@ -58,7 +60,7 @@ class Simulator(object):
     def capped_velocity(self, desired_velocity):
         """Scale down a desired velocity to its capped speed."""
         desired_speeds = np.linalg.norm(desired_velocity, axis=-1)
-        factor = np.minimum(1.0, self.max_speeds / desired_speeds)
+        factor = np.minimum(1.0, np.nan_to_num(self.max_speeds / desired_speeds))
         return desired_velocity * np.expand_dims(factor, -1)
 
     def step(self):
