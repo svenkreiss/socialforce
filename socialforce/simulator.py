@@ -22,13 +22,13 @@ class Simulator(object):
     tau is optional in this vector.
 
     ped_space is an instance of PedSpacePotential.
+    ped_ped is an instance of PedPedPotential.
 
     delta_t in seconds.
     tau in seconds: either float or numpy array of shape[n_ped].
     """
-    def __init__(self, initial_state, ped_space=None, delta_t=0.4, tau=0.5,
-                 v0=2.1, sigma=0.3,
-                 twophi=200.0, out_of_view_factor=0.5):
+    def __init__(self, initial_state, ped_space=None, ped_ped=None,
+                 field_of_view=None, delta_t=0.4, tau=0.5):
         self.state = initial_state
         self.initial_speeds = stateutils.speeds(initial_state)
         self.max_speeds = MAX_SPEED_MULTIPLIER * self.initial_speeds
@@ -41,11 +41,11 @@ class Simulator(object):
             self.state = np.concatenate((self.state, np.expand_dims(tau, -1)), axis=-1)
 
         # potentials
-        self.V = PedPedPotential(self.delta_t, v0, sigma)
+        self.V = ped_ped
         self.U = ped_space
 
         # field of view
-        self.w = FieldOfView(twophi, out_of_view_factor)
+        self.w = field_of_view
 
     def f_ab(self):
         """Compute f_ab."""
