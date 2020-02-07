@@ -41,11 +41,11 @@ class Simulator(object):
             self.state = np.concatenate((self.state, np.expand_dims(tau, -1)), axis=-1)
 
         # potentials
-        self.V = ped_ped
+        self.V = ped_ped or PedPedPotential(self.delta_t)
         self.U = ped_space
 
         # field of view
-        self.w = field_of_view
+        self.w = field_of_view or FieldOfView()
 
     def f_ab(self):
         """Compute f_ab."""
