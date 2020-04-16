@@ -30,11 +30,14 @@ def canvas(image_file=None, **kwargs):
 
 
 @contextmanager
-def graph(image_file=None, **kwargs):
+def graph(image_file=None, yield_fig=False, **kwargs):
     """Generic matplotlib context."""
     fig, ax = plt.subplots(**kwargs)
 
-    yield ax
+    if yield_fig:
+        yield fig, ax
+    else:
+        yield ax
 
     fig.set_tight_layout(True)
     if image_file:

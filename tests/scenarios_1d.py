@@ -33,7 +33,6 @@ def test_loss_landscape_1pred():
 
 def test_loss_landscape_2pred():
     print()
-    target = 1.0
     with socialforce.show.graph('docs/onedimensional_2pred_scenario.png', figsize=(6, 2.0)) as ax:
         ax.axes.get_yaxis().set_visible(False)
         ax.set_frame_on(False)
@@ -51,13 +50,55 @@ def test_loss_landscape_2pred():
         ax.plot([1.1], [0.0], 'o', label='predicted position 2', markersize=5.0, color='navy')
         ax.legend()
 
+
+def test_loss_landscape_2pred_FDE():
+    print()
+    target = 1.0
     x1 = np.linspace(0.0, 2.0, 101)
     x2 = np.linspace(-1.0, 1.0, 101)
     xx1, xx2 = np.meshgrid(x1, x2, sparse=True)
     loss = np.abs(target - (xx1 + xx2))
     with socialforce.show.graph('docs/onedimensional_2pred_fde.png') as ax:
         # ax.imshow(loss_landscape, '-', label='2-step loss', color='navy')
-        c = ax.contour(x1, x2, loss, 10)
+        c = ax.contour(x1, x2, loss, 20)
+        ax.clabel(c, inline=1, fontsize=10)
+
+        ax.plot([0.5], [0.5], 'o', label='true target position', markersize=5.0, color='grey')
+
+        ax.set_xlabel('$x_1$ [m]')
+        ax.set_ylabel('$x_2$ [m]')
+        ax.legend()
+
+
+def test_loss_landscape_2pred_ADE():
+    print()
+    target = 1.0
+    x1 = np.linspace(0.0, 2.0, 101)
+    x2 = np.linspace(-1.0, 1.0, 101)
+    xx1, xx2 = np.meshgrid(x1, x2, sparse=True)
+    loss = 0.5 * np.abs(target/2.0 - xx1) + 0.5 * np.abs(target - (xx1 + xx2))
+    with socialforce.show.graph('docs/onedimensional_2pred_ade.png') as ax:
+        # ax.imshow(loss_landscape, '-', label='2-step loss', color='navy')
+        c = ax.contour(x1, x2, loss, 20)
+        ax.clabel(c, inline=1, fontsize=10)
+
+        ax.plot([0.5], [0.5], 'o', label='true target position', markersize=5.0, color='grey')
+
+        ax.set_xlabel('$x_1$ [m]')
+        ax.set_ylabel('$x_2$ [m]')
+        ax.legend()
+
+
+def test_loss_landscape_2pred_SqADE():
+    print()
+    target = 1.0
+    x1 = np.linspace(0.0, 2.0, 101)
+    x2 = np.linspace(-1.0, 1.0, 101)
+    xx1, xx2 = np.meshgrid(x1, x2, sparse=True)
+    loss = 0.5 * np.square(target/2.0 - xx1) + 0.5 * np.square(target - (xx1 + xx2))
+    with socialforce.show.graph('docs/onedimensional_2pred_sqade.png') as ax:
+        # ax.imshow(loss_landscape, '-', label='2-step loss', color='navy')
+        c = ax.contour(x1, x2, loss, 20)
         ax.clabel(c, inline=1, fontsize=10)
 
         ax.plot([0.5], [0.5], 'o', label='true target position', markersize=5.0, color='grey')
