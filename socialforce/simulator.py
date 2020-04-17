@@ -18,8 +18,9 @@ class Simulator(object):
     """Simulate social force model.
 
     Main interface is the state. Every pedestrian is an entry in the state and
-    represented by a vector (x, y, v_x, v_y, d_x, d_y, [tau]).
-    tau is optional in this vector.
+    represented by a vector (x, y, v_x, v_y, [d_x, d_y], [tau]),
+    which are the coordinates for position, velocity and destination.
+    destination and tau are optional in this vector.
 
     ped_space is an instance of PedSpacePotential.
 
@@ -27,15 +28,28 @@ class Simulator(object):
     tau in seconds: either float or numpy array of shape[n_ped].
     """
     def __init__(self, initial_state, ped_space=None, ped_ped=None, delta_t=0.4, tau=0.5):
+        if isinstance(initial_state, (list, tuple)):
+            initial_state = torch.tensor(initial_state)
+
         self.state = initial_state
         self.desired_speeds = stateutils.speeds(initial_state)
         self.max_speeds = MAX_SPEED_MULTIPLIER * self.desired_speeds
 
         self.delta_t = delta_t
 
-        if self.state.shape[1] < 7:
+        if self.state.shape[1] == 4:
+            # destinations and tau not given
+            no_destinations = torch.full((self.state.shape[0], 2), float('nan'))
+            self.state = torch.cat((self.state, no_destinations), dim=-1)
+        if self.state.shape[1] == 5:
+            # destinations not given but tau is given
+            no_destinations = torch.full((self.state.shape[0], 2), float('nan'))
+            self.state = torch.cat(
+                (self.state[:, 0:4], no_destinations, self.state[:, 4:]), dim=-1)
+        if self.state.shape[1] == 6:
+            # tau not given
             if not hasattr(tau, 'shape'):
-                tau = tau * torch.ones(self.state.size(0))
+                tau = tau * torch.ones(self.state.shape[0])
             self.state = torch.cat((self.state, tau.unsqueeze(-1)), dim=-1)
 
         # potentials
@@ -102,3 +116,11 @@ class Simulator(object):
         self.state[:, 2:4] = v
 
         return self
+
+    def run(self, n_steps):
+        return torch.stack([
+            self.state.clone().detach()
+        ] + [
+            self.step().state.clone().detach()
+            for _ in range(n_steps)
+        ])
