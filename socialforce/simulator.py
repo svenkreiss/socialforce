@@ -28,7 +28,7 @@ class Simulator(object):
     tau in seconds: either float or numpy array of shape[n_ped].
     """
     def __init__(self, initial_state, ped_space=None, ped_ped=None, delta_t=0.4, tau=0.5):
-        if isinstance(initial_state, (list, tuple)):
+        if not isinstance(initial_state, torch.Tensor):
             initial_state = torch.tensor(initial_state)
 
         self.state = initial_state
@@ -39,17 +39,19 @@ class Simulator(object):
 
         if self.state.shape[1] == 4:
             # destinations and tau not given
-            no_destinations = torch.full((self.state.shape[0], 2), float('nan'))
+            no_destinations = torch.full((self.state.shape[0], 2), float('nan'),
+                                         dtype=self.state.dtype)
             self.state = torch.cat((self.state, no_destinations), dim=-1)
         if self.state.shape[1] == 5:
             # destinations not given but tau is given
-            no_destinations = torch.full((self.state.shape[0], 2), float('nan'))
+            no_destinations = torch.full((self.state.shape[0], 2), float('nan'),
+                                         dtype=self.state.dtype)
             self.state = torch.cat(
                 (self.state[:, 0:4], no_destinations, self.state[:, 4:]), dim=-1)
         if self.state.shape[1] == 6:
             # tau not given
             if not hasattr(tau, 'shape'):
-                tau = tau * torch.ones(self.state.shape[0])
+                tau = tau * torch.ones(self.state.shape[0], dtype=self.state.dtype)
             self.state = torch.cat((self.state, tau.unsqueeze(-1)), dim=-1)
 
         # potentials
@@ -117,10 +119,11 @@ class Simulator(object):
 
         return self
 
-    def run(self, n_steps):
+    def run(self, n_steps, *, detach=True):
         return torch.stack([
             self.state.clone().detach()
         ] + [
             self.step().state.clone().detach()
+            if detach else self.step().state.clone()
             for _ in range(n_steps)
         ])

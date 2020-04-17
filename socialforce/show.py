@@ -75,7 +75,7 @@ def animation(n, movie_file=None, writer=None, **kwargs):
     plt.close(fig)
 
 
-def states(ax, states, *, labels=None):  # pylint: disable=redefined-outer-name
+def states(ax, states, *, labels=None, **kwargs):  # pylint: disable=redefined-outer-name
     states = np.asarray(states)
 
     initial_state_np = states[0]
@@ -90,4 +90,4 @@ def states(ax, states, *, labels=None):  # pylint: disable=redefined-outer-name
         label = 'ped {}'.format(ped)
         if labels:
             label = labels[ped]
-        ax.plot(x, y, '-o', label=label, markersize=2.5)
+        ax.plot(x, y, '-o', label=label, markersize=2.5, **kwargs)
