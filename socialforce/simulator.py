@@ -27,15 +27,20 @@ class Simulator(object):
     delta_t in seconds.
     tau in seconds: either float or numpy array of shape[n_ped].
     """
-    def __init__(self, initial_state, ped_space=None, ped_ped=None, delta_t=0.4, tau=0.5):
+    def __init__(self, initial_state, *,
+                 ped_space=None, ped_ped=None, delta_t=0.4, tau=0.5,
+                 oversampling=10, dtype=None):
+        if dtype is None:
+            dtype = torch.double
         if not isinstance(initial_state, torch.Tensor):
-            initial_state = torch.tensor(initial_state)
+            initial_state = torch.tensor(initial_state, dtype=dtype)
 
         self.state = initial_state
         self.desired_speeds = stateutils.speeds(initial_state)
         self.max_speeds = MAX_SPEED_MULTIPLIER * self.desired_speeds
 
-        self.delta_t = delta_t
+        self.delta_t = delta_t / oversampling
+        self.oversampling = oversampling
 
         if self.state.shape[1] == 4:
             # destinations and tau not given
@@ -55,7 +60,7 @@ class Simulator(object):
             self.state = torch.cat((self.state, tau.unsqueeze(-1)), dim=-1)
 
         # potentials
-        self.V = ped_ped or PedPedPotential(self.delta_t)
+        self.V = ped_ped or PedPedPotential()
         self.U = ped_space
 
         # field of view
@@ -63,7 +68,7 @@ class Simulator(object):
 
     def f_ab(self):
         """Compute f_ab."""
-        return -1.0 * self.V.grad_r_ab(self.state)
+        return -1.0 * self.V.grad_r_ab(self.state, self.delta_t)
 
     def f_aB(self):
         """Compute f_aB."""
@@ -79,6 +84,13 @@ class Simulator(object):
         return desired_velocity * factor.unsqueeze(-1)
 
     def step(self):
+        """Do oversampling steps."""
+        for _ in range(self.oversampling):
+            self._step()
+
+        return self
+
+    def _step(self):
         """Do one step in the simulation and update the state in place."""
         self.state = self.state.clone().detach()
 
