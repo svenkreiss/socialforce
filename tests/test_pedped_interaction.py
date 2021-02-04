@@ -52,7 +52,7 @@ def test_b_zero_vel():
 
     # due to clipping for stability, a zero is clipped to 1e-8 which
     # is returned as 0.5 * sqrt(1e-8):
-    assert V.b(r_ab, speeds, desired_directions).numpy() == pytest.approx(np.array([
+    assert V.b(r_ab, speeds, desired_directions, delta_t=1.0).numpy() == pytest.approx(np.array([
         [0.00005, 1.0],
         [1.0, 0.00005],
     ]), abs=0.0001)
@@ -82,7 +82,7 @@ def test_torch_potential_gradient():
     pedped_potential.backward(gradients)
     print(r.grad)
 
-    analytic_abs_grad_value = 2.1 * math.exp(-1.0/0.3) * 1.0/0.3
+    analytic_abs_grad_value = 2.1 * math.exp(-1.0 / 0.3) * 1.0 / 0.3
     print(analytic_abs_grad_value)
     assert r.grad[0][0] == analytic_abs_grad_value
     assert r.grad[1][0] == -analytic_abs_grad_value

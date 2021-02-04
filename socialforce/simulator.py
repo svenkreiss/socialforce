@@ -18,7 +18,7 @@ class Simulator(object):
     """Simulate social force model.
 
     Main interface is the state. Every pedestrian is an entry in the state and
-    represented by a vector (x, y, v_x, v_y, [d_x, d_y], [tau]),
+    represented by a vector (x, y, v_x, v_y, [a_x, a_y], [d_x, d_y], [tau]),
     which are the coordinates for position, velocity and destination.
     destination and tau are optional in this vector.
 
@@ -43,17 +43,22 @@ class Simulator(object):
         self.oversampling = oversampling
 
         if self.state.shape[1] == 4:
-            # destinations and tau not given
+            # accelerations, destinations and tau not given
             no_destinations = torch.full((self.state.shape[0], 2), float('nan'),
                                          dtype=self.state.dtype)
             self.state = torch.cat((self.state, no_destinations), dim=-1)
+        if self.state.shape[1] == 6:
+            # accelerations, and tau not given
+            no_accelerations = torch.full((self.state.shape[0], 2), float('nan'),
+                                          dtype=self.state.dtype)
+            self.state = torch.cat((self.state[:, :4], no_accelerations, self.state[:, 4:]), dim=-1)
         if self.state.shape[1] == 5:
             # destinations not given but tau is given
-            no_destinations = torch.full((self.state.shape[0], 2), float('nan'),
-                                         dtype=self.state.dtype)
+            no_dest_acc = torch.full((self.state.shape[0], 4), float('nan'),
+                                     dtype=self.state.dtype)
             self.state = torch.cat(
-                (self.state[:, 0:4], no_destinations, self.state[:, 4:]), dim=-1)
-        if self.state.shape[1] == 6:
+                (self.state[:, 0:4], no_dest_acc, self.state[:, 4:]), dim=-1)
+        if self.state.shape[1] == 8:
             # tau not given
             if not hasattr(tau, 'shape'):
                 tau = tau * torch.ones(self.state.shape[0], dtype=self.state.dtype)
@@ -88,16 +93,18 @@ class Simulator(object):
         for _ in range(self.oversampling):
             self._step()
 
-        return self
+        differentiable_state = self.state
+        self.state = self.state.clone().detach()
+
+        return differentiable_state
 
     def _step(self):
         """Do one step in the simulation and update the state in place."""
-        self.state = self.state.clone().detach()
 
         # accelerate to desired velocity
         e = stateutils.desired_directions(self.state)
         vel = self.state[:, 2:4]
-        tau = self.state[:, 6:7]
+        tau = self.state[:, 8:9]
         F0 = 1.0 / tau * (self.desired_speeds.unsqueeze(-1) * e - vel)
 
         # repulsive terms between pedestrians
@@ -117,25 +124,25 @@ class Simulator(object):
         if F_aB is not None:
             F += torch.sum(F_aB, dim=1)
 
-        # before applying updates to state, make a copy of it
-        self.state = self.state.clone().detach()
-
         # desired velocity
         w = self.state[:, 2:4] + self.delta_t * F
         # velocity
         v = self.capped_velocity(w)
 
+        # before applying updates to state, make a copy of it
+        previous_state = self.state
         # update state
-        self.state[:, 0:2] += v * self.delta_t
+        self.state = self.state.clone().detach()
+        self.state[:, 0:2] = previous_state[:, 0:2] + v * self.delta_t
         self.state[:, 2:4] = v
+        self.state[:, 4:6] = F
 
         return self
 
-    def run(self, n_steps, *, detach=True):
+    def run(self, n_steps):
         return torch.stack([
-            self.state.clone().detach()
+            self.state.clone()
         ] + [
-            self.step().state.clone().detach()
-            if detach else self.step().state.clone()
+            self.step().clone()
             for _ in range(n_steps)
         ])
