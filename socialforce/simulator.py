@@ -43,7 +43,7 @@ class Simulator(object):
         self.oversampling = oversampling
 
         if integrator is None:
-            integrator = EulerIntegrator(self.delta_t, velocity_postprocess=self.capped_velocity)
+            integrator = LeapfrogIntegrator(self.delta_t, velocity_postprocess=self.capped_velocity)
         self.integrator = integrator
 
         if self.state.shape[1] == 4:
@@ -53,8 +53,7 @@ class Simulator(object):
             self.state = torch.cat((self.state, no_destinations), dim=-1)
         if self.state.shape[1] == 6:
             # accelerations, and tau not given
-            no_accelerations = torch.full((self.state.shape[0], 2), float('nan'),
-                                          dtype=self.state.dtype)
+            no_accelerations = torch.zeros((self.state.shape[0], 2), dtype=self.state.dtype)
             self.state = torch.cat((self.state[:, :4], no_accelerations, self.state[:, 4:]), dim=-1)
         if self.state.shape[1] == 5:
             # destinations not given but tau is given
@@ -157,6 +156,33 @@ class EulerIntegrator:
         # update state
         new_state[:, 0:2] = previous_state[:, 0:2] + v * self.delta_t
         new_state[:, 2:4] = v
+        new_state[:, 4:6] = acceleration
+
+        return new_state
+
+
+class LeapfrogIntegrator:
+    def __init__(self, delta_t, *, velocity_postprocess=None):
+        self.delta_t = delta_t
+        self.velocity_postprocess = velocity_postprocess
+
+    def __call__(self, state, acceleration):
+        # before applying updates to state, make a copy of it
+        previous_state = state
+        new_state = state.clone().detach()  # gradients will be connected below
+
+        # update position
+        new_state[:, 0:2] = (previous_state[:, 0:2]
+                             + previous_state[:, 2:4] * self.delta_t
+                             + 0.5 * acceleration * self.delta_t**2)
+
+        # update velocity
+        v = previous_state[:, 2:4] + 0.5 * (previous_state[:, 4:6] + acceleration) * self.delta_t
+        if self.velocity_postprocess is not None:
+            v = self.velocity_postprocess(v)
+        new_state[:, 2:4] = v
+
+        # update acceleration
         new_state[:, 4:6] = acceleration
 
         return new_state
