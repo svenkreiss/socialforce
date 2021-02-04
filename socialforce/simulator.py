@@ -29,7 +29,7 @@ class Simulator(object):
     """
     def __init__(self, initial_state, *,
                  ped_space=None, ped_ped=None, delta_t=0.4, tau=0.5,
-                 oversampling=10, dtype=None):
+                 oversampling=10, dtype=None, integrator=None):
         if dtype is None:
             dtype = torch.double
         if not isinstance(initial_state, torch.Tensor):
@@ -41,6 +41,10 @@ class Simulator(object):
 
         self.delta_t = delta_t / oversampling
         self.oversampling = oversampling
+
+        if integrator is None:
+            integrator = EulerIntegrator(self.delta_t, velocity_postprocess=self.capped_velocity)
+        self.integrator = integrator
 
         if self.state.shape[1] == 4:
             # accelerations, destinations and tau not given
@@ -124,19 +128,7 @@ class Simulator(object):
         if F_aB is not None:
             F += torch.sum(F_aB, dim=1)
 
-        # desired velocity
-        w = self.state[:, 2:4] + self.delta_t * F
-        # velocity
-        v = self.capped_velocity(w)
-
-        # before applying updates to state, make a copy of it
-        previous_state = self.state
-        # update state
-        self.state = self.state.clone().detach()
-        self.state[:, 0:2] = previous_state[:, 0:2] + v * self.delta_t
-        self.state[:, 2:4] = v
-        self.state[:, 4:6] = F
-
+        self.state = self.integrator(self.state, F)
         return self
 
     def run(self, n_steps):
@@ -146,3 +138,25 @@ class Simulator(object):
             self.step().clone()
             for _ in range(n_steps)
         ])
+
+
+class EulerIntegrator:
+    def __init__(self, delta_t, *, velocity_postprocess=None):
+        self.delta_t = delta_t
+        self.velocity_postprocess = velocity_postprocess
+
+    def __call__(self, state, acceleration):
+        # before applying updates to state, make a copy of it
+        previous_state = state
+        new_state = state.clone().detach()  # gradients will be connected below
+
+        # velocity
+        v = previous_state[:, 2:4] + self.delta_t * acceleration
+        if self.velocity_postprocess is not None:
+            v = self.velocity_postprocess(v)
+        # update state
+        new_state[:, 0:2] = previous_state[:, 0:2] + v * self.delta_t
+        new_state[:, 2:4] = v
+        new_state[:, 4:6] = acceleration
+
+        return new_state
