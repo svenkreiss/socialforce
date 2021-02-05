@@ -77,13 +77,17 @@ class PedPedPotential:
 
     def grad_r_ab(self, state, delta_t):
         """Compute gradient wrt r_ab using autograd."""
-        r_ab = self.r_ab(state).clone().detach().requires_grad_()
-        r_ab = torch.clamp(r_ab, -100, 100)  # to avoid infinities / nans
-        speeds = stateutils.speeds(state)
-        desired_directions = stateutils.desired_directions(state)
+        with torch.enable_grad():
+            # gradients that are computed here should not accumulate into the main graph
+            state = state.clone().detach()
 
-        v = self.value_r_ab(r_ab, speeds, desired_directions, delta_t)
-        r_ab_grad, = torch.autograd.grad(v, r_ab, torch.ones_like(v), create_graph=True)
+            r_ab = self.r_ab(state).requires_grad_()
+            r_ab = torch.clamp(r_ab, -100, 100)  # to avoid infinities / nans
+            speeds = stateutils.speeds(state)
+            desired_directions = stateutils.desired_directions(state)
+
+            v = self.value_r_ab(r_ab, speeds, desired_directions, delta_t)
+            r_ab_grad, = torch.autograd.grad(v, r_ab, torch.ones_like(v), create_graph=True)
         return r_ab_grad
 
     @staticmethod
