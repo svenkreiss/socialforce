@@ -49,7 +49,9 @@ class PedPedPotential:
         r = state[:, 0:2]
         r_a0 = r.unsqueeze(1)
         r_0b = r.unsqueeze(0)
-        return r_a0 - r_0b
+        r_ab = r_a0 - r_0b
+        r_ab[torch.eye(r_ab.shape[0], dtype=torch.uint8)] = 0.0  # detach diagonal gradients
+        return r_ab
 
     def __call__(self, state, *, delta_t):
         speeds = stateutils.speeds(state)
@@ -77,17 +79,22 @@ class PedPedPotential:
 
     def grad_r_ab(self, state, delta_t):
         """Compute gradient wrt r_ab using autograd."""
-        with torch.enable_grad():
-            # gradients that are computed here should not accumulate into the main graph
-            state = state.clone().detach()
-
-            r_ab = self.r_ab(state).requires_grad_()
-            r_ab = torch.clamp(r_ab, -100, 100)  # to avoid infinities / nans
+        def compute(r_ab):
             speeds = stateutils.speeds(state)
             desired_directions = stateutils.desired_directions(state)
+            return self.value_r_ab(r_ab, speeds, desired_directions, delta_t)
 
-            v = self.value_r_ab(r_ab, speeds, desired_directions, delta_t)
-            r_ab_grad, = torch.autograd.grad(v, r_ab, torch.ones_like(v), create_graph=True)
+        r_ab = self.r_ab(state)
+        r_ab = torch.clamp(r_ab, -100, 100)  # to avoid infinities / nans
+        with torch.enable_grad():
+            # gradients can only come from off-diagonal terms
+            vector = torch.ones(r_ab.shape[0:2])
+            vector[torch.eye(vector.shape[0], dtype=torch.uint8)] = 0.0  # TODO no difference?
+
+            _, r_ab_grad = torch.autograd.functional.vjp(
+                compute, r_ab, vector,
+                create_graph=True, strict=True)
+
         return r_ab_grad
 
     @staticmethod
@@ -99,7 +106,7 @@ class PedPedPotential:
         Without this treatment, backpropagating through a norm of a
         zero vector gives nan gradients.
         """
-        out = torch.norm(r_ab, dim=-1, keepdim=False).clone()
+        out = torch.norm(r_ab, dim=-1, keepdim=False)
         out[torch.eye(out.shape[0], dtype=torch.uint8)] = 0.0
         return out
 
