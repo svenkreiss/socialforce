@@ -81,7 +81,7 @@ def states(ax, states, *, labels=None, **kwargs):  # pylint: disable=redefined-o
     initial_state_np = states[0]
     ax.plot(initial_state_np[:, 0], initial_state_np[:, 1],
             'x', color='grey', label='start')
-    ax.plot(initial_state_np[:, 4], initial_state_np[:, 5],
+    ax.plot(initial_state_np[:, 6], initial_state_np[:, 7],
             'o', color='grey', label='goal')
 
     for ped in range(states.shape[1]):

@@ -9,15 +9,17 @@ class Optimizer(object):
     true_experience: list of state tuples (each state is a torch.Tensor)
     """
 
-    def __init__(self, simulator_factory, parameters, true_experience,
-                 batch_size=1, lr=0.3):
+    def __init__(self, simulator_factory, parameters, true_experience, *,
+                 batch_size=1, lr=0.3, loss=None):
         self.simulator_factory = simulator_factory
         self.parameters = parameters
         self.true_experience = true_experience
 
         self.batch_size = batch_size
         self.lr = lr
-        self.loss = torch.nn.SmoothL1Loss()
+        self.loss = loss
+        if loss is None:
+            self.loss = torch.nn.SmoothL1Loss(beta=0.05)
 
     @staticmethod
     def scenes_to_experience(scenes):
@@ -29,7 +31,7 @@ class Optimizer(object):
 
     def sim_step(self, initial_state):
         s = self.simulator_factory(initial_state)
-        return s.step().state
+        return s.step()
 
     def epoch(self):
         # data = np.random.(self.true_experience)
@@ -44,7 +46,7 @@ class Optimizer(object):
             X = torch.stack([self.sim_step(e[0]) for e in data])
 
             # loss = ((Y[:, :, :2] - X[:, :, :2]) * 10.0).pow(2).mean()
-            loss = self.loss(X[:, :, :2] * 10.0, Y[:, :, :2] * 10.0)
+            loss = self.loss(X[:, :, :2], Y[:, :, :2])
 
             epoch_loss += float(loss.item())
             n_batches += 1
