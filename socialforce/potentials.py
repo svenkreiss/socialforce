@@ -5,7 +5,7 @@ import torch
 from . import stateutils
 
 
-class PedPedPotential:
+class PedPedPotential(torch.nn.Module):
     """Ped-ped interaction potential.
 
     v0 is in m^2 / s^2.
@@ -13,6 +13,7 @@ class PedPedPotential:
     """
 
     def __init__(self, v0=2.1, sigma=0.3):
+        super().__init__()
         self.v0 = v0
         self.sigma = sigma
 
@@ -53,7 +54,7 @@ class PedPedPotential:
         r_ab[torch.eye(r_ab.shape[0], dtype=torch.uint8)] = 0.0  # detach diagonal gradients
         return r_ab
 
-    def __call__(self, state, *, delta_t):
+    def forward(self, state, *, delta_t):
         speeds = stateutils.speeds(state)
         return self.value_r_ab(
             self.r_ab(state), speeds, stateutils.desired_directions(state), delta_t)
@@ -116,46 +117,16 @@ class PedPedPotentialMLP(PedPedPotential):
 
     def __init__(self, *, hidden_units=5):
         super().__init__()
-        self.hidden_units = hidden_units
 
-        self.lin1 = torch.nn.Linear(1, hidden_units)
-        self.lin2 = torch.nn.Linear(hidden_units, 1, bias=False)
+        lin1 = torch.nn.Linear(1, hidden_units)
+        lin2 = torch.nn.Linear(hidden_units, 1, bias=False)
 
         # initialize
-        torch.nn.init.normal_(self.lin1.weight, std=0.03)
-        torch.nn.init.normal_(self.lin1.bias, std=0.03)
-        torch.nn.init.normal_(self.lin2.weight, std=0.03)
+        torch.nn.init.normal_(lin1.weight, std=0.03)
+        torch.nn.init.normal_(lin1.bias, std=0.03)
+        torch.nn.init.normal_(lin2.weight, std=0.03)
 
-        self.mlp = torch.nn.Sequential(self.lin1, torch.nn.Tanh(), self.lin2)
-
-    def double(self):
-        self.lin1.double()
-        self.lin2.double()
-        return self
-
-    def parameters(self):
-        return [
-            self.lin1.weight,
-            self.lin1.bias,
-            self.lin2.weight,
-        ]
-
-    def get_parameters(self):
-        """Returns a single 1D array of parameters."""
-        return torch.cat((
-            self.lin1.weight.view(-1),
-            self.lin1.bias,
-            self.lin2.weight.view(-1),
-        ))
-
-    def set_parameters(self, parameters_1d):
-        """Set parameters of the MLP from the given 1D parameter tensor."""
-        with torch.no_grad():
-            i = 0
-            for p in (self.lin1.weight, self.lin1.bias, self.lin2.weight):
-                n = p.nelement()
-                p[:] = parameters_1d[i:i + n].view(p.shape)
-                i += n
+        self.mlp = torch.nn.Sequential(lin1, torch.nn.Tanh(), lin2)
 
     def value_b(self, b):
         """Calculate value given b."""
@@ -170,7 +141,7 @@ class PedPedPotentialMLP(PedPedPotential):
         return v
 
 
-class PedSpacePotential(object):
+class PedSpacePotential(torch.nn.Module):
     """Pedestrian-space interaction potential.
 
     space is a list of numpy arrays containing points of boundaries.
@@ -180,6 +151,7 @@ class PedSpacePotential(object):
     """
 
     def __init__(self, space, u0=10, r=0.2):
+        super().__init__()
         self.space = space or []
         self.u0 = u0
         self.r = r
@@ -203,7 +175,7 @@ class PedSpacePotential(object):
             0, 1)  # index order: pedestrian, boundary, coordinates
         return r_a - closest_points
 
-    def __call__(self, state):
+    def forward(self, state):
         return self.value_r_aB(self.r_aB(state))
 
     def grad_r_aB(self, state, delta=1e-3):
