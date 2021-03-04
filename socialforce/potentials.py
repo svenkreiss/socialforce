@@ -28,10 +28,10 @@ class PedPedPotential(torch.nn.Module):
             self.norm_r_ab(r_ab - delta_t * speeds_b_abc * e_b)
         )**2 - (delta_t * speeds_b)**2
 
-        # in_sqrt[torch.eye(in_sqrt.shape[0], dtype=torch.uint8)] = 0.0  # protect forward pass
+        # torch.diagonal(in_sqrt)[:] = 0.0  # protect forward pass
         in_sqrt = torch.clamp(in_sqrt, min=1e-8)
         out = 0.5 * torch.sqrt(in_sqrt)
-        # out[torch.eye(out.shape[0], dtype=torch.uint8)] = 0.0  # protect backward pass
+        # torch.diagonal(out)[:] = 0.0  # protect backward pass
 
         return out
 
@@ -51,13 +51,13 @@ class PedPedPotential(torch.nn.Module):
         r_a0 = r.unsqueeze(1)
         r_0b = r.unsqueeze(0)
         r_ab = r_a0 - r_0b
-        r_ab[torch.eye(r_ab.shape[0], dtype=torch.uint8)] = 0.0  # detach diagonal gradients
+        torch.diagonal(r_ab)[:] = 0.0  # detach diagonal gradients
         return r_ab
 
     def forward(self, state, *, delta_t):
-        speeds = stateutils.speeds(state)
-        return self.value_r_ab(
-            self.r_ab(state), speeds, stateutils.desired_directions(state), delta_t)
+        speeds = stateutils.speeds(state).detach()
+        desired_directions = stateutils.desired_directions(state).detach()
+        return self.value_r_ab(self.r_ab(state), speeds, desired_directions, delta_t)
 
     def grad_r_ab_finite_difference(self, state, delta_t, delta=1e-3):
         """Compute gradient wrt r_ab using finite difference differentiation."""
@@ -73,24 +73,25 @@ class PedPedPotential(torch.nn.Module):
         dvdy = (self.value_r_ab(r_ab + dy, speeds, desired_directions, delta_t) - v) / delta
 
         # remove gradients from self-intereactions
-        dvdx[torch.eye(dvdx.shape[0], dtype=torch.uint8)] = 0.0
-        dvdy[torch.eye(dvdx.shape[0], dtype=torch.uint8)] = 0.0
+        torch.diagonal(dvdx)[:] = 0.0
+        torch.diagonal(dvdy)[:] = 0.0
 
         return torch.stack((dvdx, dvdy), dim=-1)
 
     def grad_r_ab(self, state, delta_t):
         """Compute gradient wrt r_ab using autograd."""
+        speeds = stateutils.speeds(state).detach()
+        desired_directions = stateutils.desired_directions(state).detach()
+
         def compute(r_ab):
-            speeds = stateutils.speeds(state)
-            desired_directions = stateutils.desired_directions(state)
             return self.value_r_ab(r_ab, speeds, desired_directions, delta_t)
 
         r_ab = self.r_ab(state)
         r_ab = torch.clamp(r_ab, -100, 100)  # to avoid infinities / nans
         with torch.enable_grad():
             # gradients can only come from off-diagonal terms
-            vector = torch.ones(r_ab.shape[0:2])
-            vector[torch.eye(vector.shape[0], dtype=torch.uint8)] = 0.0  # TODO no difference?
+            vector = torch.ones(r_ab.shape[0:2], requires_grad=False)
+            torch.diagonal(vector)[:] = 0.0
 
             _, r_ab_grad = torch.autograd.functional.vjp(
                 compute, r_ab, vector,
@@ -108,7 +109,7 @@ class PedPedPotential(torch.nn.Module):
         zero vector gives nan gradients.
         """
         out = torch.norm(r_ab, dim=-1, keepdim=False)
-        out[torch.eye(out.shape[0], dtype=torch.uint8)] = 0.0
+        torch.diagonal(out)[:] = 0.0
         return out
 
 

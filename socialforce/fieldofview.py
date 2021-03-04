@@ -23,5 +23,5 @@ class FieldOfView:
         in_sight = torch.einsum('aj,abj->ab', (e, f)) > torch.norm(f, dim=-1) * self.cosphi
         out = self.out_of_view_factor * torch.ones_like(in_sight, dtype=e.dtype)
         out[in_sight] = 1.0
-        out[torch.eye(out.shape[0], dtype=torch.uint8)] = 0.0
+        torch.diagonal(out)[:] = 0.0
         return out

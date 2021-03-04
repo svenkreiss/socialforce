@@ -74,8 +74,7 @@ def test_torch_potential_gradient():
     print(r_ab_norm)
 
     pedped_potential = v0 * torch.exp(-r_ab_norm / sigma)
-    diag = torch.eye(pedped_potential.shape[0], dtype=torch.uint8)
-    pedped_potential[diag] = 0.0
+    torch.diagonal(pedped_potential)[:] = 0.0
     # pedped_potential = torch.sum(pedped_potential, dim=1)
     print('value', pedped_potential)
     gradients = torch.ones_like(pedped_potential)
