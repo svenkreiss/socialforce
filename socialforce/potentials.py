@@ -24,8 +24,8 @@ class PedPedPotential(torch.nn.Module):
         e_b = desired_directions.unsqueeze(0)
 
         in_sqrt = (
-            self.norm_r_ab(r_ab) +
-            self.norm_r_ab(r_ab - delta_t * speeds_b_abc * e_b)
+            self.norm_r_ab(r_ab)
+            + self.norm_r_ab(r_ab - delta_t * speeds_b_abc * e_b)
         )**2 - (delta_t * speeds_b)**2
 
         # torch.diagonal(in_sqrt)[:] = 0.0  # protect forward pass
