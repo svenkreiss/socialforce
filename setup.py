@@ -12,12 +12,12 @@ setup(
     packages=[
         'socialforce',
     ],
-    license='MIT',
-    description='PyTorch implementation of the Non-parametric Social Force model.',
+    license='AGPL',
+    description='PyTorch implementation of DeepSocialForce.',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     author='Sven Kreiss',
-    author_email='me@svenkreiss.com',
+    author_email='research@svenkreiss.com',
     url='https://github.com/svenkreiss/socialforce',
 
     install_requires=[
@@ -30,6 +30,7 @@ setup(
             'pytest',
         ],
         'plot': [
+            'flameprof',
             'matplotlib',
             'scipy',
         ],

@@ -15,3 +15,7 @@ dist/
 
 # OS
 .DS_Store
+
+# data
+docs/simulator.prof
+docs/simulator_flame.svg
