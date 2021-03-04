@@ -3,8 +3,8 @@ import random
 import torch
 
 
-class Optimizer(object):
-    """Optimizer
+class Trainer:
+    """Trainer
 
     true_experience: list of state tuples (each state is a torch.Tensor)
     """

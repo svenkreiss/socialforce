@@ -11,4 +11,4 @@ good-names=ax,b,e,f,f_aB,F0,F_ab,F_aB,F,grad_r_aB,i,lr,n,nx,ny,xy,r,r_aB,U,u0,V,
 generated-members=numpy.*,torch.*
 
 
-disable=useless-object-inheritance,too-many-instance-attributes,too-few-public-methods,too-many-arguments,duplicate-code,E1102,missing-docstring
+disable=too-many-instance-attributes,too-few-public-methods,too-many-arguments,duplicate-code,missing-docstring,not-callable
