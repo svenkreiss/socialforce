@@ -94,7 +94,6 @@ class Simulator(torch.nn.Module):
     def capped_velocity(self, desired_velocity):
         """Scale down a desired velocity to its capped speed."""
         desired_speeds = torch.norm(desired_velocity, dim=-1)
-        # factor = torch.minimum(1.0, self.max_speeds / desired_speeds)
         factor = torch.clamp(self.max_speeds / desired_speeds, max=1.0)
         return desired_velocity * factor.unsqueeze(-1)
 
