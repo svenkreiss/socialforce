@@ -6,7 +6,7 @@ from . import stateutils
 
 
 class PedPedPotential(torch.nn.Module):
-    """Ped-ped interaction potential.
+    """Ped-ped interaction potential based on distance b.
 
     v0 is in m^2 / s^2.
     sigma is in m.
