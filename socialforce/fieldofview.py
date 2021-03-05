@@ -21,7 +21,7 @@ class FieldOfView:
         f is a rank 3 tensor.
         """
         in_sight = torch.einsum('aj,abj->ab', (e, f)) > torch.norm(f, dim=-1) * self.cosphi
-        out = self.out_of_view_factor * torch.ones_like(in_sight, dtype=e.dtype)
+        out = torch.full_like(in_sight, self.out_of_view_factor, dtype=e.dtype)
         out[in_sight] = 1.0
         torch.diagonal(out)[:] = 0.0
         return out

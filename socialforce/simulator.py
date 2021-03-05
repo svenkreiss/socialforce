@@ -116,11 +116,14 @@ class Simulator(torch.nn.Module):
         F0 = 1.0 / tau * (self.desired_speeds.unsqueeze(-1) * e - vel)
 
         # repulsive terms between pedestrians
-        F_ab = None
         f_ab = self.f_ab(state)
-        if f_ab is not None:
+
+        # field of view modulation
+        if f_ab is not None and self.w is not None:
             w = self.w(e, -f_ab).unsqueeze(-1)
             F_ab = w * f_ab
+        else:
+            F_ab = f_ab
 
         # repulsive terms between pedestrians and boundaries
         F_aB = self.f_aB(state)
