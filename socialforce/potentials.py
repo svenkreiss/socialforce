@@ -128,15 +128,8 @@ class PedPedPotentialMLP(PedPedPotential):
 
     def value_b(self, b):
         """Calculate value given b."""
-        # modified_b = 3.0 - b
-        # modified_b[torch.eye(modified_b.shape[0], dtype=torch.uint8)] = 0.0
-        # print('b', b)
         b = torch.clamp(b, max=100.0)
-        v = self.mlp(b.view(-1, 1)).view(b.shape)
-        # v[torch.eye(v.shape[0], dtype=torch.uint8)] = 0.0
-        # print(b, v)
-        # v[b > 3.0] = 0.0
-        return v
+        return self.mlp(b.view(-1, 1)).view(b.shape)
 
 
 class PedSpacePotential(torch.nn.Module):
