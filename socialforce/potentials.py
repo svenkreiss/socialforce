@@ -89,10 +89,7 @@ class PedPedPotential(torch.nn.Module):
         r_ab = self.r_ab(state)
         r_ab = torch.clamp(r_ab, -100, 100)  # to avoid infinities / nans
         with torch.enable_grad():
-            # gradients can only come from off-diagonal terms
             vector = torch.ones(r_ab.shape[0:2], requires_grad=False)
-            torch.diagonal(vector)[:] = 0.0
-
             _, r_ab_grad = torch.autograd.functional.vjp(
                 compute, r_ab, vector,
                 create_graph=True, strict=True)
