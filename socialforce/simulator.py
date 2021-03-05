@@ -8,7 +8,7 @@ See Helbing and Molnár 1998.
 import torch
 
 from .potentials import PedPedPotential
-from .fieldofview import FieldOfView
+from .field_of_view import FieldOfView
 from . import stateutils
 
 MAX_SPEED_MULTIPLIER = 1.3  # with respect to initial speed
@@ -26,9 +26,11 @@ class Simulator(torch.nn.Module):
 
     delta_t in seconds.
     tau in seconds: either float or numpy array of shape[n_ped].
+    field_of_view: use -1 to remove
     """
     def __init__(self, initial_state, *,
-                 ped_space=None, ped_ped=None, delta_t=0.4, tau=0.5,
+                 ped_space=None, ped_ped=None, field_of_view=None,
+                 delta_t=0.4, tau=0.5,
                  oversampling=10, dtype=None, integrator=None):
         super().__init__()
 
@@ -50,7 +52,7 @@ class Simulator(torch.nn.Module):
         self.U = ped_space
 
         # field of view
-        self.w = FieldOfView()
+        self.w = field_of_view or FieldOfView()
 
     def normalize_state(self, state):
         if not isinstance(state, torch.Tensor):
@@ -119,7 +121,7 @@ class Simulator(torch.nn.Module):
         f_ab = self.f_ab(state)
 
         # field of view modulation
-        if f_ab is not None and self.w is not None:
+        if f_ab is not None and self.w is not None and self.w != -1:
             w = self.w(e, -f_ab).unsqueeze(-1)
             F_ab = w * f_ab
         else:
