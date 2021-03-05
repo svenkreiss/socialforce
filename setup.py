@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 # extract version from __init__.py
 with open('socialforce/__init__.py', 'r') as f:
@@ -9,9 +9,7 @@ with open('socialforce/__init__.py', 'r') as f:
 setup(
     name='socialforce',
     version=VERSION,
-    packages=[
-        'socialforce',
-    ],
+    packages=find_packages(),
     license='AGPL',
     description='PyTorch implementation of DeepSocialForce.',
     long_description=open('README.md').read(),
