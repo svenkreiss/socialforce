@@ -111,7 +111,7 @@ class Simulator(torch.nn.Module):
         """Do one step in the simulation and update the state in place."""
 
         # accelerate to desired velocity
-        e = stateutils.desired_directions(state)
+        e = stateutils.desired_directions(state).detach()
         vel = state[:, 2:4]
         tau = state[:, 8:9]
         F0 = 1.0 / tau * (self.desired_speeds.unsqueeze(-1) * e - vel)
@@ -121,7 +121,7 @@ class Simulator(torch.nn.Module):
 
         # field of view modulation
         if f_ab is not None and self.w is not None and self.w != -1:
-            w = self.w(e, -f_ab).unsqueeze(-1)
+            w = self.w(e, -f_ab).unsqueeze(-1).detach()
             F_ab = w * f_ab
         else:
             F_ab = f_ab
