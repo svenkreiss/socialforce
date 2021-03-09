@@ -3,6 +3,9 @@
 from contextlib import contextmanager
 
 import numpy as np
+import torch
+
+from . import potentials
 
 try:
     import matplotlib.pyplot as plt
@@ -91,3 +94,30 @@ def states(ax, states, *, labels=None, **kwargs):  # pylint: disable=redefined-o
         if labels:
             label = labels[ped]
         ax.plot(x, y, '-o', label=label, markersize=2.5, **kwargs)
+
+
+def potential1D(V, ax1, ax2=None, **kwargs):
+    b = np.linspace(0, 3, 200)
+    y = V.value_b(torch.from_numpy(b)).detach().numpy()
+    y -= y[-1]
+
+    ax1.set_xlabel('$b$ [m]')
+    ax1.set_ylabel('$V$')
+    ax1.plot(b, y, **kwargs)
+    ax1.legend()
+
+    if ax2 is not None:
+        ax2.set_xlabel(r'$b$ [m]')
+        ax2.set_ylabel(r'$\nabla V$')
+        delta_b = b[1:] - b[:-1]
+        average_b = 0.5 * (b[:-1] + b[1:])
+        diff_b = y[1:] - y[:-1]
+        ax2.plot(average_b, diff_b / delta_b, **kwargs)
+        ax2.legend()
+
+
+def potential1D_parametric(V, ax1, ax2=None, label=None, sigma_label=None, linestyle=None, **kwargs):
+    potential1D(V, ax1, ax2, linestyle=linestyle, label=label, **kwargs)
+    ax1.axvline(V.sigma, linestyle='dotted', label=sigma_label, **kwargs)
+    if ax2 is not None:
+        ax2.axvline(V.sigma, linestyle='dotted', label=sigma_label, **kwargs)
