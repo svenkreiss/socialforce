@@ -123,7 +123,7 @@ def potential1D_parametric(V, ax1, ax2=None, label=None, sigma_label=None, lines
         ax2.axvline(V.sigma, linestyle='dotted', label=sigma_label, **kwargs)
 
 
-def potential2D(V, ax, nx=601, ny=601, **kwargs):
+def potential2D(V, ax, nx=601, ny=601, delta_t=1.0, **kwargs):
     # the "pedestrian of interest" is beta and the probe pedestrians are alpha
 
     x1 = np.linspace(-0.5, 1.5, nx, dtype=np.float32)
@@ -139,7 +139,7 @@ def potential2D(V, ax, nx=601, ny=601, **kwargs):
     ax.axvline(0.0, ls='dotted', color='gray')
 
     with torch.no_grad():
-        values = V.value_r_ab(r_ab_probe, speeds_b, desired_directions_b, 1.0)
+        values = V.value_r_ab(r_ab_probe, speeds_b, desired_directions_b, delta_t)
         values -= torch.min(values)
     values = values.view((len(x1), len(x2)))
 
@@ -154,7 +154,7 @@ def potential2D(V, ax, nx=601, ny=601, **kwargs):
     ax.legend()
 
 
-def potential2Dgrad(V, ax, nx=601, ny=601, **kwargs):
+def potential2Dgrad(V, ax, nx=601, ny=601, delta_t=1.0, **kwargs):
     # the "pedestrian of interest" is beta and the probe pedestrians are alpha
 
     x1 = np.linspace(-0.5, 1.5, nx, dtype=np.float32)
@@ -170,7 +170,7 @@ def potential2Dgrad(V, ax, nx=601, ny=601, **kwargs):
     ax.axvline(0.0, ls='dotted', color='gray')
 
     with torch.no_grad():
-        grad = V.grad_r_ab_(r_ab_probe, speeds_b, desired_directions_b, 1.0)
+        grad = V.grad_r_ab_(r_ab_probe, speeds_b, desired_directions_b, delta_t)
         values = torch.linalg.norm(grad, ord=2, dim=-1)
         values -= torch.min(values)
     values = values.view((len(x1), len(x2)))
