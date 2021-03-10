@@ -80,7 +80,7 @@ class Trainer:
         epoch_loss /= n_batches
         return epoch_loss
 
-    def loop(self, n_epochs, log_interval=10):
+    def loop(self, n_epochs, log_interval=1):
         for i in range(n_epochs):
             loss = self.epoch()
             if (i + 1) % log_interval == 0:
