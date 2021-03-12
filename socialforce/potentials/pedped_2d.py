@@ -84,10 +84,10 @@ class PedPedPotentialMLP1p1D(PedPedPotential2D):
 
 class PedPedPotentialMLP2D(PedPedPotential2D):
     """Ped-ped interaction potential."""
-    def __init__(self, *, hidden_units=64, n_fourier_features=None, fourier_scale=1.0):
+    def __init__(self, *, hidden_units=16, n_fourier_features=None, fourier_scale=1.0):
         super().__init__()
 
-        input_features = 2
+        input_features = 3
 
         if n_fourier_features:
             fourier_featurizer = torch.randn((input_features, n_fourier_features // 2))
@@ -99,55 +99,19 @@ class PedPedPotentialMLP2D(PedPedPotential2D):
 
         lin1 = torch.nn.Linear(input_features, hidden_units)
         lin2 = torch.nn.Linear(hidden_units, hidden_units)
-        # lin25 = torch.nn.Linear(hidden_units // 4, hidden_units // 4)
         lin3 = torch.nn.Linear(hidden_units, 1)
-
-        # initialize
-        # torch.nn.init.normal_(lin1.weight, std=0.03)
-        # torch.nn.init.normal_(lin1.bias, std=0.03)
-        # torch.nn.init.normal_(lin2.weight, std=0.03)
-        # torch.nn.init.normal_(lin2.bias, std=0.03)
-        # torch.nn.init.normal_(lin3.weight, std=0.03)
-        # torch.nn.init.normal_(lin3.bias, std=0.03)
 
         self.mlp = torch.nn.Sequential(
             lin1, torch.nn.Softplus(),
             lin2, torch.nn.Softplus(),
-            # lin25, torch.nn.Tanh(),
             lin3, torch.nn.Softplus(),
         )
 
     def input_features(self, r_ab, speeds, desired_directions):
-        b = self.b(r_ab, speeds, desired_directions)
-        b = torch.clamp_max(b, 100.0)
-        # r_ab = r_ab.detach()
-
-        norm_r_ab = self.norm_r_ab(r_ab)
-        unit_r_ab = r_ab / torch.clamp_min(norm_r_ab.unsqueeze(-1), 0.001)
-        cos_b = torch.einsum('abj,bj->ab', unit_r_ab, desired_directions if unit_r_ab.shape[1] > 1 else desired_directions[0:1])
-        # cos_a = torch.einsum('abj,aj->ab', unit_r_ab, desired_directions if unit_r_ab.shape[0] > 1 else desired_directions[0:1])
-
-        # desired_directions = torch.repeat_interleave(
-        #     desired_directions.unsqueeze(0), r_ab.shape[0], dim=0)
-        # third_dim = torch.zeros_like(unit_r_ab[:, :, 0:1])
-        # unit_r_ab = torch.cat((unit_r_ab, third_dim), dim=2)
-        # desired_directions = torch.cat((desired_directions, third_dim), dim=2)
-        # sin = torch.norm(torch.cross(unit_r_ab, desired_directions, dim=2), dim=2)
-
-        # speeds_ab = torch.repeat_interleave(speeds.unsqueeze(0), r_ab.shape[0], dim=0)
-
-        # desired_directions_a = torch.repeat_interleave(desired_directions.unsqueeze(1), r_ab.shape[1], dim=1)
-        # parallel_d = torch.einsum('abj,abj->ab', r_ab, desired_directions_a)
-        # torch.diagonal(parallel_d)[:] = 0.0
-        # perpendicular_d = torch.linalg.norm(r_ab - desired_directions_a * parallel_d.unsqueeze(-1), ord=2, dim=2)
-        # torch.diagonal(perpendicular_d)[:] = 0.0
-
-        # upper_half = torch.ones_like(norm_r_ab)
-        # upper_half[r_ab[:, :, 1] < 0.0] = -1.0
         input_vector = torch.stack((
-            b,
-            cos_b,
-            # cos_a,
+            self.b(r_ab, speeds, desired_directions),
+            self.perpendicular_d(r_ab, desired_directions),
+            self.parallel_d(r_ab, desired_directions),
         ), dim=-1)
 
         if self.fourier_featurizer is not None:
