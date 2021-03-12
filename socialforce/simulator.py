@@ -59,31 +59,31 @@ class Simulator(torch.nn.Module):
             state = torch.tensor(state, dtype=self.dtype)
 
         if state.shape[1] == 4:
-            # accelerations, destinations and tau not given
+            # accelerations and destinations not given
             no_destinations = torch.full((state.shape[0], 2), float('nan'),
                                          dtype=state.dtype)
             state = torch.cat((state, no_destinations), dim=-1)
-        if state.shape[1] == 6:
-            # accelerations, and tau not given
-            no_accelerations = torch.zeros((state.shape[0], 2), dtype=state.dtype)
-            state = torch.cat((state[:, :4], no_accelerations, state[:, 4:]), dim=-1)
         if state.shape[1] == 5:
-            # destinations not given but tau is given
+            # accelerations and destinations not given but tau is given
             no_dest_acc = torch.full((state.shape[0], 4), float('nan'),
                                      dtype=state.dtype)
-            state = torch.cat(
-                (state[:, 0:4], no_dest_acc, state[:, 4:]), dim=-1)
+            state = torch.cat((state[:, 0:4], no_dest_acc, state[:, 4:]), dim=-1)
+        if state.shape[1] in (6, 7):
+            # accelerations not given
+            no_accelerations = torch.zeros((state.shape[0], 2), dtype=state.dtype)
+            state = torch.cat((state[:, :4], no_accelerations, state[:, 4:]), dim=-1)
         if state.shape[1] == 8:
             # tau not given
             if not hasattr(self.tau, 'shape'):
                 self.tau = self.tau * torch.ones(state.shape[0], dtype=state.dtype)
             state = torch.cat((state, self.tau.unsqueeze(-1)), dim=-1)
 
+        assert state.shape[1] == 9, state.shape[1]
         return state
 
     def f_ab(self, state):
         """Compute f_ab."""
-        return -1.0 * self.V.grad_r_ab(state, self.delta_t)
+        return -1.0 * self.V.grad_r_ab(state)
 
     def f_aB(self, state):
         """Compute f_aB."""
@@ -93,7 +93,7 @@ class Simulator(torch.nn.Module):
 
     def capped_velocity(self, desired_velocity):
         """Scale down a desired velocity to its capped speed."""
-        desired_speeds = torch.norm(desired_velocity, dim=-1)
+        desired_speeds = torch.linalg.norm(desired_velocity, ord=2, dim=-1)
         factor = torch.clamp(self.max_speeds / desired_speeds, max=1.0)
         return desired_velocity * factor.unsqueeze(-1)
 
@@ -112,22 +112,24 @@ class Simulator(torch.nn.Module):
 
         # accelerate to desired velocity
         e = stateutils.desired_directions(state).detach()
-        vel = state[:, 2:4]
-        tau = state[:, 8:9]
+        vel = state[:, 2:4].detach()
+        tau = state[:, 8:9].detach()
         F0 = 1.0 / tau * (self.desired_speeds.unsqueeze(-1) * e - vel)
 
         # repulsive terms between pedestrians
-        f_ab = self.f_ab(state)
+        f_ab = self.f_ab(state.detach())
 
         # field of view modulation
         if f_ab is not None and self.w is not None and self.w != -1:
-            w = self.w(e, -f_ab).unsqueeze(-1).detach()
+            # w = self.w(e, -f_ab).unsqueeze(-1).detach()
+            r_ab = PedPedPotential.r_ab(state)
+            w = self.w(e, r_ab).unsqueeze(-1).detach()
             F_ab = w * f_ab
         else:
             F_ab = f_ab
 
         # repulsive terms between pedestrians and boundaries
-        F_aB = self.f_aB(state)
+        F_aB = self.f_aB(state.detach())
 
         # social force
         F = F0

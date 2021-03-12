@@ -11,13 +11,14 @@ class PedPedPotential(torch.nn.Module):
     v0 is in m^2 / s^2.
     sigma is in m.
     """
+    delta_t_step = 0.4
 
     def __init__(self, v0=2.1, sigma=0.3):
         super().__init__()
         self.v0 = v0
         self.sigma = sigma
 
-    def b(self, r_ab, speeds, desired_directions, delta_t):
+    def b(self, r_ab, speeds, desired_directions):
         """Calculate b."""
         speeds_b = speeds.unsqueeze(0)
         speeds_b_abc = speeds_b.unsqueeze(2)  # abc = alpha, beta, coordinates
@@ -25,8 +26,8 @@ class PedPedPotential(torch.nn.Module):
 
         in_sqrt = (
             self.norm_r_ab(r_ab)
-            + self.norm_r_ab(r_ab - delta_t * speeds_b_abc * e_b)
-        )**2 - (delta_t * speeds_b)**2
+            + self.norm_r_ab(r_ab - self.delta_t_step * speeds_b_abc * e_b)
+        )**2 - (self.delta_t_step * speeds_b)**2
 
         # torch.diagonal(in_sqrt)[:] = 0.0  # protect forward pass
         in_sqrt = torch.clamp(in_sqrt, min=1e-8)
@@ -39,9 +40,9 @@ class PedPedPotential(torch.nn.Module):
         """Value of potential parametrized with b."""
         return self.v0 * torch.exp(-b / self.sigma)
 
-    def value_r_ab(self, r_ab, speeds, desired_directions, delta_t):
+    def value_r_ab(self, r_ab, speeds, desired_directions):
         """Value of potential explicitely parametrized with r_ab."""
-        b = self.b(r_ab, speeds, desired_directions, delta_t)
+        b = self.b(r_ab, speeds, desired_directions)
         return self.value_b(b)
 
     @staticmethod
@@ -49,17 +50,17 @@ class PedPedPotential(torch.nn.Module):
         """Construct r_ab using broadcasting."""
         r = state[:, 0:2]
         r_a0 = r.unsqueeze(1)
-        r_0b = r.unsqueeze(0)
+        r_0b = r.unsqueeze(0).detach()  # detach others
         r_ab = r_a0 - r_0b
         torch.diagonal(r_ab)[:] = 0.0  # detach diagonal gradients
         return r_ab
 
-    def forward(self, state, *, delta_t):
+    def forward(self, state):
         speeds = stateutils.speeds(state).detach()
         desired_directions = stateutils.desired_directions(state).detach()
-        return self.value_r_ab(self.r_ab(state), speeds, desired_directions, delta_t)
+        return self.value_r_ab(self.r_ab(state), speeds, desired_directions)
 
-    def grad_r_ab_finite_difference(self, state, delta_t, delta=1e-3):
+    def grad_r_ab_finite_difference(self, state, delta=1e-3):
         """Compute gradient wrt r_ab using finite difference differentiation."""
         r_ab = self.r_ab(state[:, 0:2])
         speeds = stateutils.speeds(state)
@@ -68,9 +69,9 @@ class PedPedPotential(torch.nn.Module):
         dx = torch.tensor([[[delta, 0.0]]])
         dy = torch.tensor([[[0.0, delta]]])
 
-        v = self.value_r_ab(r_ab, speeds, desired_directions, delta_t)
-        dvdx = (self.value_r_ab(r_ab + dx, speeds, desired_directions, delta_t) - v) / delta
-        dvdy = (self.value_r_ab(r_ab + dy, speeds, desired_directions, delta_t) - v) / delta
+        v = self.value_r_ab(r_ab, speeds, desired_directions)
+        dvdx = (self.value_r_ab(r_ab + dx, speeds, desired_directions) - v) / delta
+        dvdy = (self.value_r_ab(r_ab + dy, speeds, desired_directions) - v) / delta
 
         # remove gradients from self-intereactions
         torch.diagonal(dvdx)[:] = 0.0
@@ -78,16 +79,18 @@ class PedPedPotential(torch.nn.Module):
 
         return torch.stack((dvdx, dvdy), dim=-1)
 
-    def grad_r_ab(self, state, delta_t):
+    def grad_r_ab(self, state):
         """Compute gradient wrt r_ab using autograd."""
         speeds = stateutils.speeds(state).detach()
         desired_directions = stateutils.desired_directions(state).detach()
-
-        def compute(r_ab):
-            return self.value_r_ab(r_ab, speeds, desired_directions, delta_t)
-
         r_ab = self.r_ab(state)
-        r_ab = torch.clamp(r_ab, -100, 100)  # to avoid infinities / nans
+        return self.grad_r_ab_(r_ab, speeds, desired_directions)
+
+    def grad_r_ab_(self, r_ab, speeds, desired_directions):
+        """Compute gradient wrt r_ab using autograd."""
+        def compute(r_ab):
+            return self.value_r_ab(r_ab, speeds, desired_directions)
+
         with torch.enable_grad():
             vector = torch.ones(r_ab.shape[0:2], requires_grad=False)
             _, r_ab_grad = torch.autograd.functional.vjp(
@@ -105,7 +108,7 @@ class PedPedPotential(torch.nn.Module):
         Without this treatment, backpropagating through a norm of a
         zero vector gives nan gradients.
         """
-        out = torch.norm(r_ab, dim=-1, keepdim=False)
+        out = torch.linalg.norm(r_ab, ord=2, dim=2, keepdim=False)
         torch.diagonal(out)[:] = 0.0
         return out
 
@@ -113,18 +116,23 @@ class PedPedPotential(torch.nn.Module):
 class PedPedPotentialMLP(PedPedPotential):
     """Ped-ped interaction potential."""
 
-    def __init__(self, *, hidden_units=5):
+    def __init__(self, *, hidden_units=5, small_init=False):
         super().__init__()
 
         lin1 = torch.nn.Linear(1, hidden_units)
-        lin2 = torch.nn.Linear(hidden_units, 1, bias=False)
+        lin2 = torch.nn.Linear(hidden_units, 1)
 
         # initialize
-        torch.nn.init.normal_(lin1.weight, std=0.03)
-        torch.nn.init.normal_(lin1.bias, std=0.03)
-        torch.nn.init.normal_(lin2.weight, std=0.03)
+        if small_init:
+            torch.nn.init.normal_(lin1.weight, std=0.03)
+            torch.nn.init.normal_(lin1.bias, std=0.03)
+            torch.nn.init.normal_(lin2.weight, std=0.03)
+            torch.nn.init.normal_(lin2.bias, std=0.03)
 
-        self.mlp = torch.nn.Sequential(lin1, torch.nn.Tanh(), lin2)
+        self.mlp = torch.nn.Sequential(
+            lin1, torch.nn.Softplus(),
+            lin2, torch.nn.Softplus(),
+        )
 
     def value_b(self, b):
         """Calculate value given b."""

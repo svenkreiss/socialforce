@@ -10,7 +10,7 @@ class Circle:
     def __init__(self, ped_ped=None):
         self.ped_ped = ped_ped or potentials.PedPedPotential(2.1)
 
-    def generate(self, n):
+    def generate(self, n, **kwargs):
         torch.manual_seed(42)
         np.random.seed(42)
 
@@ -33,7 +33,7 @@ class Circle:
 
         with torch.no_grad():
             return [
-                Simulator(initial_state, ped_ped=self.ped_ped).run(21)
+                Simulator(initial_state, ped_ped=self.ped_ped, **kwargs).run(21)
                 for initial_state in generator_initial_states
             ]
 
@@ -42,24 +42,24 @@ class ParallelOvertake:
     def __init__(self, ped_ped=None):
         self.ped_ped = ped_ped or potentials.PedPedPotential(2.1)
 
-    def generate(self, n):
+    def generate(self, n, **kwargs):
         torch.manual_seed(42)
         np.random.seed(42)
 
         # ped0 always left to right
-        ped0 = [-5.0, 0.0, 1.0, 0.0, 5.0, 0.0]
+        ped0 = [-5.0, 0.0, 1.0, 0.0, 5.0, 0.0, 0.5]
 
         generator_initial_states = []
-        for b in -0.3 + 0.6 * np.random.rand(n):
+        for b in -1.0 + 2.0 * np.random.rand(n):
             # with 20% speed variation
             speed = 1.3 + 0.2 * np.random.rand(1)[0]
-            ped1 = [-7.0, b, speed, 0.0, 7.0, b]
+            ped1 = [-7.0, b, speed, 0.0, 7.0, b, 0.1]
 
             state = np.array([ped0, ped1])
             generator_initial_states.append(state)
 
         with torch.no_grad():
             return [
-                Simulator(initial_state, ped_ped=self.ped_ped).run(21)
+                Simulator(initial_state, ped_ped=self.ped_ped, **kwargs).run(21)
                 for initial_state in generator_initial_states
             ]
