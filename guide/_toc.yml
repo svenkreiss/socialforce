@@ -1,0 +1,16 @@
+# Table of content
+# Learn more at https://jupyterbook.org/customize/toc.html
+#
+- file: intro
+
+- part: Chapters
+  chapters:
+  - file: scenarios
+  - file: fitpedped_1d
+  - file: fitpedped_1p1d
+  - file: fitpedped_2d
+  - file: performance
+
+- part: Reference
+  chapters:
+  - file: modules

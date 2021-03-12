@@ -9,6 +9,10 @@ venv*/
 __pycache__/
 dist/
 .ipynb_checkpoints/
+guide_py/
+guide/_build/
+guide/simulator.prof
+guide/simulator_flame.svg
 
 # editors
 .vscode/
