@@ -123,16 +123,16 @@ def potential1D_parametric(V, ax1, ax2=None, label=None, sigma_label=None, lines
         ax2.axvline(V.sigma, linestyle='dotted', label=sigma_label, **kwargs)
 
 
-def potential2D(V, ax, nx=601, ny=601, delta_t=1.0, **kwargs):
+def potential2D(V, ax, nx=600, ny=400, delta_t=1.0, dtype=torch.double, **kwargs):
     # the "pedestrian of interest" is beta and the probe pedestrians are alpha
 
-    x1 = np.linspace(-0.5, 1.5, nx, dtype=np.float32)
-    x2 = np.linspace(-0.75, 0.75, ny, dtype=np.float32)
-    xx1, xx2 = np.meshgrid(x1, x2)
-    r_ab_probe = torch.from_numpy(np.stack((xx1, xx2), axis=-1)).view(-1, 2).unsqueeze(1)
+    x1 = torch.linspace(-1.0, 2.0, nx, dtype=dtype)
+    x2 = torch.linspace(-1.0, 1.0, ny, dtype=dtype)
+    xx1, xx2 = torch.meshgrid(x1, x2)
+    r_ab_probe = torch.stack((xx1, xx2), dim=-1).view(-1, 2).unsqueeze(1)
 
-    speeds_b = torch.ones((r_ab_probe.shape[1],)) * 1.0
-    desired_directions_b = torch.zeros((r_ab_probe.shape[1], 2))
+    speeds_b = torch.full((1,), 1.0, dtype=dtype)
+    desired_directions_b = torch.zeros((1, 2), dtype=dtype)
     desired_directions_b[:, 0] = 1.0
 
     ax.axhline(0.0, ls='dotted', color='gray')
@@ -141,10 +141,10 @@ def potential2D(V, ax, nx=601, ny=601, delta_t=1.0, **kwargs):
     with torch.no_grad():
         values = V.value_r_ab(r_ab_probe, speeds_b, desired_directions_b, delta_t)
         values -= torch.min(values)
-    values = values.view((len(x1), len(x2)))
+        values = values.view((len(x1), len(x2)))
 
     ax.clabel(
-        ax.contour(x1, x2, values, levels=np.linspace(0.2, 3.0, 15), vmax=1.0),
+        ax.contour(x1, x2, values.T, levels=np.linspace(0.1, 1.5, 15), vmin=0.1, vmax=1.5, **kwargs),
         inline=1, fontsize=10)
 
     ax.plot([0.0], [0.0], 'o', label='pedestrian', markersize=5.0, color='black')
@@ -154,16 +154,16 @@ def potential2D(V, ax, nx=601, ny=601, delta_t=1.0, **kwargs):
     ax.legend()
 
 
-def potential2Dgrad(V, ax, nx=601, ny=601, delta_t=1.0, **kwargs):
+def potential2D_grad(V, ax, nx=600, ny=400, delta_t=1.0, dtype=torch.double, **kwargs):
     # the "pedestrian of interest" is beta and the probe pedestrians are alpha
 
-    x1 = np.linspace(-0.5, 1.5, nx, dtype=np.float32)
-    x2 = np.linspace(-0.75, 0.75, ny, dtype=np.float32)
-    xx1, xx2 = np.meshgrid(x1, x2)
-    r_ab_probe = torch.from_numpy(np.stack((xx1, xx2), axis=-1)).view(-1, 2).unsqueeze(1)
+    x1 = torch.linspace(-1.0, 2.0, nx, dtype=dtype)
+    x2 = torch.linspace(-1.0, 1.0, ny, dtype=dtype)
+    xx1, xx2 = torch.meshgrid(x1, x2)
+    r_ab_probe = torch.stack((xx1, xx2), dim=-1).view(-1, 2).unsqueeze(1)
 
-    speeds_b = torch.ones((r_ab_probe.shape[1],)) * 1.0
-    desired_directions_b = torch.zeros((r_ab_probe.shape[1], 2))
+    speeds_b = torch.full((1,), 1.0, dtype=dtype)
+    desired_directions_b = torch.zeros((1, 2), dtype=dtype)
     desired_directions_b[:, 0] = 1.0
 
     ax.axhline(0.0, ls='dotted', color='gray')
@@ -172,11 +172,11 @@ def potential2Dgrad(V, ax, nx=601, ny=601, delta_t=1.0, **kwargs):
     with torch.no_grad():
         grad = V.grad_r_ab_(r_ab_probe, speeds_b, desired_directions_b, delta_t)
         values = torch.linalg.norm(grad, ord=2, dim=-1)
-        values -= torch.min(values)
-    values = values.view((len(x1), len(x2)))
+        # values -= torch.min(values)
+        values = values.view((len(x1), len(x2)))
 
     ax.clabel(
-        ax.contour(x1, x2, values, levels=np.linspace(0, 3.0, 16), vmax=1.5),
+        ax.contour(x1, x2, values.T, levels=np.linspace(0.1, 1.5, 15), vmin=0.1, vmax=1.5, **kwargs),
         inline=1, fontsize=10)
 
     ax.plot([0.0], [0.0], 'o', label='pedestrian', markersize=5.0, color='black')
