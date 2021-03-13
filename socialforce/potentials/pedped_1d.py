@@ -113,6 +113,24 @@ class PedPedPotential(torch.nn.Module):
         return out
 
 
+class PedPedPotentialWall(PedPedPotential):
+    """Ped-ped interaction potential based on distance b.
+
+    v0 is in m^2 / s^2.
+    sigma is in m.
+    """
+    delta_t_step = 0.4
+
+    def __init__(self, sigma=0.3, w=0.1):
+        super().__init__()
+        self.sigma = sigma
+        self.w = w
+
+    def value_b(self, b):
+        """Value of potential parametrized with b."""
+        return torch.exp(-(b - self.sigma) / self.w)
+
+
 class PedPedPotentialMLP(PedPedPotential):
     """Ped-ped interaction potential."""
 
