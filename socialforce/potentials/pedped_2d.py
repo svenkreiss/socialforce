@@ -53,6 +53,29 @@ class PedPedPotential2D(torch.nn.Module):
         return value
 
 
+class PedPedPotentialDiamond(PedPedPotential2D):
+    """Ped-ped interaction potential."""
+    def __init__(self, v0=2.1, sigma=0.3, asymmetry=0.0):
+        super().__init__()
+
+        self.v0 = v0
+        self.sigma = sigma
+        self.asymmetry = asymmetry
+
+    def value_r_ab(self, r_ab, speeds, desired_directions):
+        """Value of potential explicitely parametrized with r_ab."""
+        assert speeds.requires_grad is False
+        assert desired_directions.requires_grad is False
+
+        parallel_d = self.parallel_d(r_ab, desired_directions)
+        perpendicular_d = self.perpendicular_d(r_ab, desired_directions)
+        l1 = torch.linalg.norm(
+            torch.stack((parallel_d, perpendicular_d), dim=-1),
+            ord=1, dim=-1,
+        )
+        return self.v0 * torch.clamp_min(1.0 - 0.5 / self.sigma * l1, 0.0)
+
+
 class PedPedPotentialMLP1p1D(PedPedPotential2D):
     """Ped-ped interaction potential."""
     def __init__(self, *, hidden_units=5):
@@ -91,11 +114,11 @@ class PedPedPotentialMLP2D(PedPedPotential2D):
 
         if n_fourier_features:
             fourier_featurizer = torch.randn((input_features, n_fourier_features // 2))
-            scale = fourier_scale * 2.0 * math.pi / input_features
-            self.register_buffer('fourier_featurizer', fourier_featurizer * scale)
+            self.register_buffer('fourier_featurizer', fourier_featurizer)
             input_features = n_fourier_features
         else:
             self.fourier_featurizer = None
+        self.fourier_scale = fourier_scale
 
         lin1 = torch.nn.Linear(input_features, hidden_units)
         lin2 = torch.nn.Linear(hidden_units, hidden_units)
@@ -120,6 +143,7 @@ class PedPedPotentialMLP2D(PedPedPotential2D):
         return input_vector
 
     def fourier_features(self, input_vector):
+        input_vector = torch.nn.functional.tanh(input_vector / self.fourier_scale) * 2.0 * math.pi
         ff = torch.matmul(input_vector, self.fourier_featurizer)
         ff = torch.cat((torch.sin(ff), torch.cos(ff)), dim=-1)
         return ff
