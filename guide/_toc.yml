@@ -10,6 +10,7 @@
   - file: fitpedped_1p1d
   - file: fitpedped_2d
   - file: fitpedped_1d_wall
+  - file: fitpedped_diamond
   - file: performance
 
 - part: Reference
