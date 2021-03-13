@@ -143,7 +143,7 @@ class PedPedPotentialMLP2D(PedPedPotential2D):
         return input_vector
 
     def fourier_features(self, input_vector):
-        input_vector = torch.nn.functional.tanh(input_vector / self.fourier_scale) * 2.0 * math.pi
+        input_vector = torch.tanh(input_vector / self.fourier_scale) * 2.0 * math.pi
         ff = torch.matmul(input_vector, self.fourier_featurizer)
         ff = torch.cat((torch.sin(ff), torch.cos(ff)), dim=-1)
         return ff
