@@ -81,19 +81,22 @@ def animation(n, movie_file=None, writer=None, **kwargs):
 def states(ax, states, *, labels=None, **kwargs):  # pylint: disable=redefined-outer-name
     states = np.asarray(states)
 
-    initial_state_np = states[0]
-    ax.plot(initial_state_np[:, 0], initial_state_np[:, 1],
-            'x', color='grey', label='start')
-    ax.plot(initial_state_np[:, 6], initial_state_np[:, 7],
-            'o', color='grey', label='goal')
-
     for ped in range(states.shape[1]):
         x = states[1:, ped, 0]
         y = states[1:, ped, 1]
         label = 'ped {}'.format(ped)
         if labels:
             label = labels[ped]
-        ax.plot(x, y, '-o', label=label, markersize=2.5, **kwargs)
+        tracks = ax.plot(x, y, '-o', label=label, markersize=2.5, **kwargs)
+
+        marker_color = tracks[0].get_color()
+        marker_alpha = tracks[0].get_alpha()
+        ax.plot(states[0, ped:ped + 1, 0], states[0, ped:ped + 1, 1],
+                'x', color=marker_color, alpha=marker_alpha,
+                label='start' if ped == 0 else None)
+        ax.plot(states[0, ped:ped + 1, 6], states[0, ped:ped + 1, 7],
+                'o', color=marker_color, alpha=marker_alpha,
+                label='goal' if ped == 0 else None)
 
 
 def potential1D(V, ax1, ax2=None, **kwargs):
