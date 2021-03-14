@@ -10,12 +10,13 @@ class Circle:
     def __init__(self, ped_ped=None):
         self.ped_ped = ped_ped or potentials.PedPedPotential(2.1)
 
-    def generate(self, n, **kwargs):
-        torch.manual_seed(42)
-        np.random.seed(42)
+    def generate(self, n, *, seed=None, **kwargs):
+        if seed is not None:
+            np.random.seed(seed)
 
         # ped0 always left to right
-        ped0 = np.array([-5.0, 0.0, 1.0, 0.0, 5.0, 0.0])
+        speed0 = 0.8 + 0.4 * np.random.rand(1)[0]
+        ped0 = np.array([-5.0, 0.0, speed0, 0.0, 5.0, 0.0])
 
         generator_initial_states = []
         for theta in np.random.rand(n) * 2.0 * math.pi:
@@ -24,7 +25,7 @@ class Circle:
             r = np.array([[c, -s], [s, c]])
             ped1 = np.concatenate((
                 np.matmul(r, ped0[0:2]),
-                np.matmul(r, ped0[2:4]) * (0.8 + np.random.rand(1) * 0.4),
+                np.matmul(r, ped0[2:4]) * (0.8 + 0.4 * np.random.rand(1)),
                 np.matmul(r, ped0[4:6]),
             ))
             generator_initial_states.append(
@@ -42,12 +43,13 @@ class ParallelOvertake:
     def __init__(self, ped_ped=None):
         self.ped_ped = ped_ped or potentials.PedPedPotential(2.1)
 
-    def generate(self, n, **kwargs):
-        torch.manual_seed(42)
-        np.random.seed(42)
+    def generate(self, n, *, seed=None, **kwargs):
+        if seed is not None:
+            np.random.seed(seed)
 
         # ped0 always left to right
-        ped0 = [-5.0, 0.0, 1.0, 0.0, 5.0, 0.0, 0.5]
+        speed0 = 0.8 + 0.4 * np.random.rand(1)[0]
+        ped0 = [-5.0, 0.0, speed0, 0.0, 5.0, 0.0, 0.5]
 
         generator_initial_states = []
         for b in -1.0 + 2.0 * np.random.rand(n):
