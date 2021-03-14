@@ -149,8 +149,10 @@ def potential2D(V, ax, nx=600, ny=400, dtype=torch.double, **kwargs):
     ax.clabel(
         ax.contour(x1, x2, values.T, levels=np.linspace(0.1, 1.5, 15), vmin=0.1, vmax=1.5, **kwargs),
         inline=1, fontsize=10)
+    ax.plot([0.0], [0.0], '-', label=r'$V$', color='seagreen')  # just for legend
 
     ax.plot([0.0], [0.0], 'o', label='pedestrian', markersize=5.0, color='black')
+    ax.arrow(0.0, 0.0, 0.4, 0.0, width=0.01, zorder=10)
     ax.set_xlabel('$x_1$ [m]')
     ax.set_ylabel('$x_2$ [m]')
     ax.set_aspect('equal')
@@ -181,8 +183,10 @@ def potential2D_grad(V, ax, nx=600, ny=400, dtype=torch.double, **kwargs):
     ax.clabel(
         ax.contour(x1, x2, values.T, levels=np.linspace(0.1, 1.5, 15), vmin=0.1, vmax=1.5, **kwargs),
         inline=1, fontsize=10)
+    ax.plot([0.0], [0.0], '-', label=r'$|\nabla V|$', color='seagreen')  # just for legend
 
     ax.plot([0.0], [0.0], 'o', label='pedestrian', markersize=5.0, color='black')
+    ax.arrow(0.0, 0.0, 0.4, 0.0, width=0.01, zorder=10)
     ax.set_xlabel('$x_1$ [m]')
     ax.set_ylabel('$x_2$ [m]')
     ax.set_aspect('equal')

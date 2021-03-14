@@ -9,7 +9,7 @@
   - file: integrators
   - file: performance
 
-- part: Potentials
+- part: PedPed Potentials
   chapters:
   - file: pedped_1d
   - file: pedped_1p1d

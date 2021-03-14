@@ -7,10 +7,11 @@ from .simulator import Simulator
 
 
 class Circle:
-    def __init__(self, ped_ped=None):
+    def __init__(self, ped_ped=None, **kwargs):
         self.ped_ped = ped_ped or potentials.PedPedPotential(2.1)
+        self.simulator = Simulator(ped_ped=self.ped_ped, **kwargs)
 
-    def generate(self, n, *, seed=None, **kwargs):
+    def generate(self, n, *, seed=None):
         if seed is not None:
             np.random.seed(seed)
 
@@ -29,21 +30,22 @@ class Circle:
                 np.matmul(r, ped0[4:6]),
             ))
             generator_initial_states.append(
-                np.stack((ped0, ped1))
+                self.simulator.normalize_state(np.stack((ped0, ped1)))
             )
 
         with torch.no_grad():
             return [
-                Simulator(initial_state, ped_ped=self.ped_ped, **kwargs).run(21)
+                self.simulator.run(initial_state, 21)
                 for initial_state in generator_initial_states
             ]
 
 
 class ParallelOvertake:
-    def __init__(self, ped_ped=None):
+    def __init__(self, ped_ped=None, **kwargs):
         self.ped_ped = ped_ped or potentials.PedPedPotential(2.1)
+        self.simulator = Simulator(ped_ped=self.ped_ped, **kwargs)
 
-    def generate(self, n, *, seed=None, **kwargs):
+    def generate(self, n, *, seed=None):
         if seed is not None:
             np.random.seed(seed)
 
@@ -58,10 +60,11 @@ class ParallelOvertake:
             ped1 = [-7.0, b, speed, 0.0, 7.0, b, 0.1]
 
             state = np.array([ped0, ped1])
+            state = self.simulator.normalize_state(state)
             generator_initial_states.append(state)
 
         with torch.no_grad():
             return [
-                Simulator(initial_state, ped_ped=self.ped_ped, **kwargs).run(21)
+                self.simulator.run(initial_state, 21)
                 for initial_state in generator_initial_states
             ]

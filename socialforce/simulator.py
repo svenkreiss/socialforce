@@ -11,8 +11,6 @@ from .potentials import PedPedPotential
 from .field_of_view import FieldOfView
 from . import stateutils
 
-MAX_SPEED_MULTIPLIER = 1.3  # with respect to initial speed
-
 
 class Simulator(torch.nn.Module):
     """Simulate social force model.
@@ -28,7 +26,9 @@ class Simulator(torch.nn.Module):
     tau in seconds: either float or numpy array of shape[n_ped].
     field_of_view: use -1 to remove
     """
-    def __init__(self, initial_state, *,
+    max_speed_multiplier = 1.3
+
+    def __init__(self, *,
                  ped_space=None, ped_ped=None, field_of_view=None,
                  delta_t=0.4, tau=0.5,
                  oversampling=10, dtype=None, integrator=None):
@@ -36,9 +36,6 @@ class Simulator(torch.nn.Module):
 
         self.tau = tau
         self.dtype = dtype if dtype is not None else torch.double
-        self.initial_state = self.normalize_state(initial_state)
-        self.desired_speeds = stateutils.speeds(self.initial_state).clone().detach()
-        self.max_speeds = MAX_SPEED_MULTIPLIER * self.desired_speeds
 
         self.delta_t = delta_t / oversampling
         self.oversampling = oversampling
@@ -77,8 +74,12 @@ class Simulator(torch.nn.Module):
             if not hasattr(self.tau, 'shape'):
                 self.tau = self.tau * torch.ones(state.shape[0], dtype=state.dtype)
             state = torch.cat((state, self.tau.unsqueeze(-1)), dim=-1)
+        if state.shape[1] == 9:
+            # preferred speed not given
+            preferred_speeds = stateutils.speeds(state)
+            state = torch.cat((state, preferred_speeds.unsqueeze(-1)), dim=-1)
 
-        assert state.shape[1] == 9, state.shape[1]
+        assert state.shape[1] == 10, state.shape[1]
         return state
 
     def f_ab(self, state):
@@ -91,15 +92,16 @@ class Simulator(torch.nn.Module):
             return None
         return -1.0 * self.U.grad_r_aB(state)
 
-    def capped_velocity(self, desired_velocity):
+    def capped_velocity(self, state, desired_velocity):
         """Scale down a desired velocity to its capped speed."""
         desired_speeds = torch.linalg.norm(desired_velocity, ord=2, dim=-1)
-        factor = torch.clamp(self.max_speeds / desired_speeds, max=1.0)
-        return desired_velocity * factor.unsqueeze(-1)
+        max_speeds = state[:, 9:10] * self.max_speed_multiplier
+        factor = torch.clamp(max_speeds / desired_speeds, max=1.0)
+        return desired_velocity * factor
 
     def forward(self, *args):
         """Do oversampling steps."""
-        state = args[0] if args else self.initial_state
+        state = args[0]
         state = self.normalize_state(state.clone().detach())
 
         for _ in range(self.oversampling):
@@ -110,11 +112,12 @@ class Simulator(torch.nn.Module):
     def _step(self, state):
         """Do one step in the simulation and update the state in place."""
 
-        # accelerate to desired velocity
+        # accelerate to preferred velocity
         e = stateutils.desired_directions(state).detach()
         vel = state[:, 2:4].detach()
         tau = state[:, 8:9].detach()
-        F0 = 1.0 / tau * (self.desired_speeds.unsqueeze(-1) * e - vel)
+        preferred_speeds = state[:, 9:10].detach()
+        F0 = 1.0 / tau * (preferred_speeds * e - vel)
 
         # repulsive terms between pedestrians
         f_ab = self.f_ab(state.detach())
@@ -140,8 +143,8 @@ class Simulator(torch.nn.Module):
 
         return self.integrator(state, F)
 
-    def run(self, n_steps):
-        states = [self.initial_state.clone()]
+    def run(self, state, n_steps):
+        states = [state.clone().detach()]
         for _ in range(n_steps):
             last_state = states[-1]
             states.append(self(last_state).clone())
@@ -162,7 +165,7 @@ class EulerIntegrator:
         # velocity
         v = previous_state[:, 2:4] + self.delta_t * previous_state[:, 4:6]
         if self.velocity_postprocess is not None:
-            v = self.velocity_postprocess(v)
+            v = self.velocity_postprocess(previous_state, v)
         # update state
         new_state[:, 0:2] = previous_state[:, 0:2] + previous_state[:, 2:4] * self.delta_t
         new_state[:, 2:4] = v
@@ -189,7 +192,7 @@ class LeapfrogIntegrator:
         # update velocity
         v = previous_state[:, 2:4] + 0.5 * (previous_state[:, 4:6] + acceleration) * self.delta_t
         if self.velocity_postprocess is not None:
-            v = self.velocity_postprocess(v)
+            v = self.velocity_postprocess(previous_state, v)
         new_state[:, 2:4] = v
 
         # update acceleration
