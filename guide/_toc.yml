@@ -3,15 +3,19 @@
 #
 - file: intro
 
-- part: Chapters
+- part: Simulation
   chapters:
   - file: scenarios
-  - file: fitpedped_1d
-  - file: fitpedped_1p1d
-  - file: fitpedped_2d
-  - file: fitpedped_1d_wall
-  - file: fitpedped_diamond
+  - file: integrators
   - file: performance
+
+- part: Potentials
+  chapters:
+  - file: pedped_1d
+  - file: pedped_1p1d
+  - file: pedped_2d
+  - file: pedped_1d_wall
+  - file: pedped_diamond
 
 - part: Reference
   chapters:

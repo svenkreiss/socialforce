@@ -160,11 +160,11 @@ class EulerIntegrator:
         new_state = state.clone().detach()  # gradients will be connected below
 
         # velocity
-        v = previous_state[:, 2:4] + self.delta_t * acceleration
+        v = previous_state[:, 2:4] + self.delta_t * previous_state[:, 4:6]
         if self.velocity_postprocess is not None:
             v = self.velocity_postprocess(v)
         # update state
-        new_state[:, 0:2] = previous_state[:, 0:2] + v * self.delta_t
+        new_state[:, 0:2] = previous_state[:, 0:2] + previous_state[:, 2:4] * self.delta_t
         new_state[:, 2:4] = v
         new_state[:, 4:6] = acceleration
 
