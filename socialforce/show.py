@@ -5,8 +5,6 @@ from contextlib import contextmanager
 import numpy as np
 import torch
 
-from . import potentials
-
 try:
     import matplotlib.pyplot as plt
     import matplotlib.animation as mpl_animation
@@ -82,8 +80,8 @@ def states(ax, states, *, labels=None, **kwargs):  # pylint: disable=redefined-o
     states = np.asarray(states)
 
     for ped in range(states.shape[1]):
-        x = states[1:, ped, 0]
-        y = states[1:, ped, 1]
+        x = states[:, ped, 0]
+        y = states[:, ped, 1]
         label = 'ped {}'.format(ped)
         if labels:
             label = labels[ped]
@@ -92,12 +90,12 @@ def states(ax, states, *, labels=None, **kwargs):  # pylint: disable=redefined-o
         marker_color = tracks[0].get_color()
         marker_alpha = tracks[0].get_alpha()
         ax.plot(states[0, ped:ped + 1, 0], states[0, ped:ped + 1, 1],
-                'x', color=marker_color, alpha=marker_alpha,
-                markeredgewidth=2,
-                label='start' if ped == 0 else None)
-        ax.plot(states[0, ped:ped + 1, 6], states[0, ped:ped + 1, 7],
                 'o', color=marker_color, alpha=marker_alpha,
                 markeredgewidth=0,
+                label='start' if ped == 0 else None)
+        ax.plot(states[0, ped:ped + 1, 6], states[0, ped:ped + 1, 7],
+                'x', color=marker_color, alpha=marker_alpha,
+                markeredgewidth=2,
                 label='goal' if ped == 0 else None)
 
 
