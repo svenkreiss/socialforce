@@ -33,7 +33,8 @@ def main():
                     if val not in cell_tags:
                         cell_tags.append(val)
 
-            if cell_tags and set(cell_tags) != set(cell['metadata']['tags']):
+            if cell_tags and ('tags' not in cell['metadata']
+                              or set(cell_tags) != set(cell['metadata']['tags'])):
                 cell['metadata']['tags'] = cell_tags
                 modified = True
             elif 'tags' in cell['metadata'] and not cell_tags:
