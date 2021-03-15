@@ -35,7 +35,7 @@ class Simulator(torch.nn.Module):
         super().__init__()
 
         self.tau = tau
-        self.dtype = dtype if dtype is not None else torch.double
+        self.dtype = dtype if dtype is not None else torch.float32
 
         self.delta_t = delta_t / oversampling
         self.oversampling = oversampling

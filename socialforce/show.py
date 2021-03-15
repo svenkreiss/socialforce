@@ -93,16 +93,22 @@ def states(ax, states, *, labels=None, **kwargs):  # pylint: disable=redefined-o
         marker_alpha = tracks[0].get_alpha()
         ax.plot(states[0, ped:ped + 1, 0], states[0, ped:ped + 1, 1],
                 'x', color=marker_color, alpha=marker_alpha,
+                markeredgewidth=2,
                 label='start' if ped == 0 else None)
         ax.plot(states[0, ped:ped + 1, 6], states[0, ped:ped + 1, 7],
                 'o', color=marker_color, alpha=marker_alpha,
+                markeredgewidth=0,
                 label='goal' if ped == 0 else None)
 
 
 def potential1D(V, ax1, ax2=None, **kwargs):
-    b = np.linspace(0, 3, 200)
-    y = V.value_b(torch.from_numpy(b)).detach().numpy()
-    y -= y[-1]
+    parameters = list(V.parameters())
+    dtype = parameters[0].dtype if parameters else torch.float32
+    b = torch.linspace(0.0, 3.0, 200, dtype=dtype)
+
+    with torch.no_grad():
+        y = V.value_b(b)
+        y = y - y[-1]
 
     ax1.set_xlabel('$b$ [m]')
     ax1.set_ylabel('$V$')
@@ -126,9 +132,11 @@ def potential1D_parametric(V, ax1, ax2=None, label=None, sigma_label=None, lines
         ax2.axvline(V.sigma, linestyle='dotted', label=sigma_label, **kwargs)
 
 
-def potential2D(V, ax, nx=600, ny=400, dtype=torch.double, **kwargs):
+def potential2D(V, ax, nx=600, ny=400, **kwargs):
     # the "pedestrian of interest" is beta and the probe pedestrians are alpha
 
+    parameters = list(V.parameters())
+    dtype = parameters[0].dtype if parameters else torch.float32
     x1 = torch.linspace(-1.0, 2.0, nx, dtype=dtype)
     x2 = torch.linspace(-1.0, 1.0, ny, dtype=dtype)
     xx1, xx2 = torch.meshgrid(x1, x2)
@@ -159,9 +167,11 @@ def potential2D(V, ax, nx=600, ny=400, dtype=torch.double, **kwargs):
     ax.legend()
 
 
-def potential2D_grad(V, ax, nx=600, ny=400, dtype=torch.double, **kwargs):
+def potential2D_grad(V, ax, nx=600, ny=400, **kwargs):
     # the "pedestrian of interest" is beta and the probe pedestrians are alpha
 
+    parameters = list(V.parameters())
+    dtype = parameters[0].dtype if parameters else torch.float32
     x1 = torch.linspace(-1.0, 2.0, nx, dtype=dtype)
     x2 = torch.linspace(-1.0, 1.0, ny, dtype=dtype)
     xx1, xx2 = torch.meshgrid(x1, x2)
