@@ -85,7 +85,7 @@ def states(ax, states, *, labels=None, **kwargs):  # pylint: disable=redefined-o
         label = 'ped {}'.format(ped)
         if labels:
             label = labels[ped]
-        tracks = ax.plot(x, y, '-o', label=label, markersize=2.5, **kwargs)
+        tracks = ax.plot(x, y, '-o', label=label, markersize=2.5, markeredgewidth=0, **kwargs)
 
         marker_color = tracks[0].get_color()
         marker_alpha = tracks[0].get_alpha()
