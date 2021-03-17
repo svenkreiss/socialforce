@@ -89,13 +89,18 @@ def states(ax, states, *, labels=None, **kwargs):  # pylint: disable=redefined-o
 
         marker_color = tracks[0].get_color()
         marker_alpha = tracks[0].get_alpha()
+        marker_zorder = tracks[0].get_zorder()
         ax.plot(states[0, ped:ped + 1, 0], states[0, ped:ped + 1, 1],
-                'o', color=marker_color, alpha=marker_alpha,
+                'o', color=marker_color,
+                alpha=marker_alpha,
                 markeredgewidth=0,
+                zorder=marker_zorder,
                 label='start' if ped == 0 else None)
         ax.plot(states[0, ped:ped + 1, 6], states[0, ped:ped + 1, 7],
-                'x', color=marker_color, alpha=marker_alpha,
+                'x', color=marker_color,
+                alpha=marker_alpha,
                 markeredgewidth=2,
+                zorder=marker_zorder,
                 label='goal' if ped == 0 else None)
 
 
