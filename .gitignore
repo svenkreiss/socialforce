@@ -1,6 +1,6 @@
 # data
 circle_parameters*.pkl
-trajnet/
+data-trajnet*/
 
 # Python
 venv*/
