@@ -17,6 +17,7 @@ sphinx:
   config:
     autodoc_member_order: bysource
     language: en
+    latex_toplevel_sectioning: 'part'
 
 parse:
   myst_enable_extensions:
@@ -26,9 +27,9 @@ parse:
     - dollarmath
 
 # Define the name of the latex output file for PDF builds
-# latex:
-#   latex_documents:
-#     targetname: book.tex
+latex:
+  latex_documents:
+    targetname: article.tex
 
 execute:
   timeout: 600

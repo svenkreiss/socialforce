@@ -24,6 +24,7 @@ setup(
     ],
     extras_require={
         'dev': [
+            'jupyter-book',
             'nbstripout',
             'pylint',
             'pytest',
