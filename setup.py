@@ -12,7 +12,7 @@ setup(
     packages=[
         'socialforce',
     ],
-    license='MIT',
+    license='AGPLv3',
     description='Numpy implementation of the Social Force model.',
     long_description=open('README.rst').read(),
     author='Sven Kreiss',
