@@ -107,7 +107,11 @@ class PedPedPotentialMLP1p1D(PedPedPotential2D):
 
 class PedPedPotentialMLP2D(PedPedPotential2D):
     """Ped-ped interaction potential."""
-    def __init__(self, *, hidden_units=16, n_fourier_features=None, fourier_scale=1.0):
+    def __init__(self, *,
+                 hidden_units=16,
+                 n_fourier_features=None,
+                 fourier_scale=1.0,
+                 fourier_features_tanh=True):
         super().__init__()
 
         input_features = 3
@@ -119,6 +123,7 @@ class PedPedPotentialMLP2D(PedPedPotential2D):
         else:
             self.fourier_featurizer = None
         self.fourier_scale = fourier_scale
+        self.fourier_features_tanh = fourier_features_tanh
 
         lin1 = torch.nn.Linear(input_features, hidden_units)
         lin2 = torch.nn.Linear(hidden_units, hidden_units)
@@ -143,7 +148,10 @@ class PedPedPotentialMLP2D(PedPedPotential2D):
         return input_vector
 
     def fourier_features(self, input_vector):
-        input_vector = torch.tanh(input_vector / self.fourier_scale) * 2.0 * math.pi
+        if self.fourier_features_tanh:
+            input_vector = 2.0 * math.pi * torch.tanh(input_vector / self.fourier_scale)
+        else:
+            input_vector = 2.0 * math.pi * input_vector / self.fourier_scale
         ff = torch.matmul(input_vector, self.fourier_featurizer)
         ff = torch.cat((torch.sin(ff), torch.cos(ff)), dim=-1)
         return ff
