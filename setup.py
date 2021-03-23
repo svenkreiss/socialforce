@@ -23,7 +23,8 @@ setup(
         'torch',
     ],
     extras_require={
-        'test': [
+        'dev': [
+            'nbstripout',
             'pylint',
             'pytest',
         ],
