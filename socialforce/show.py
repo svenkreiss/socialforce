@@ -14,7 +14,7 @@ except ImportError:
 
 
 @contextmanager
-def track_canvas(image_file=None, show=True, **kwargs):
+def track_canvas(image_file=None, show=True, tight_layout=True, **kwargs):
     """Generic matplotlib context."""
     fig, ax = plt.subplots(**kwargs)
 
@@ -34,7 +34,8 @@ def track_canvas(image_file=None, show=True, **kwargs):
 
     yield ax
 
-    fig.set_tight_layout(True)
+    if tight_layout:
+        fig.set_tight_layout(True)
     if image_file:
         fig.savefig(image_file, dpi=200)
     if show:
@@ -111,6 +112,12 @@ def states(ax, states, *, labels=None, monochrome=False, **kwargs):  # pylint: d
                 markeredgewidth=2,
                 zorder=marker_zorder,
                 label='goal' if ped == 0 else None)
+
+
+def space(ax, ped_space_potential):
+    for s in ped_space_potential.space:
+        s = np.asarray(s)
+        ax.plot(s[:, 0], s[:, 1], '-o', color='black', markersize=2.5)
 
 
 def potential1D(V, ax1, ax2=None, **kwargs):

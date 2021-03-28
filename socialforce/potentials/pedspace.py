@@ -51,6 +51,7 @@ class PedSpacePotential(torch.nn.Module):
 
         return torch.stack((dvdx, dvdy), dim=-1)
 
+
 class PedSpacePotential(torch.nn.Module):
     """Pedestrian-space interaction potential.
 
