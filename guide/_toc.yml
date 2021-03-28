@@ -17,6 +17,10 @@
   - file: pedped_1d_wall
   - file: pedped_diamond
 
+- part: Demo
+  chapters:
+  - file: corridor
+
 - part: Reference
   chapters:
   - file: modules
