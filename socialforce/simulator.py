@@ -196,3 +196,25 @@ class LeapfrogIntegrator:
         new_state[:, 4:6] = acceleration
 
         return new_state
+
+
+class PeriodicBoundary:
+    def __init__(self, integrator, *, x_boundary=None, y_boundary=None):
+        self.integrator = integrator
+        self.x_boundary = x_boundary
+        self.y_boundary = y_boundary
+
+    def __call__(self, state, acceleration):
+        old_state = self.integrator(state, acceleration)
+
+        new_state = old_state.clone()
+        if self.x_boundary is not None:
+            width = self.x_boundary[1] - self.x_boundary[0]
+            new_state[old_state[:, 0] < self.x_boundary[0], 0] += width
+            new_state[old_state[:, 0] > self.x_boundary[1], 0] -= width
+        if self.y_boundary is not None:
+            height = self.y_boundary[1] - self.y_boundary[0]
+            new_state[old_state[:, 1] < self.y_boundary[0], 1] += height
+            new_state[old_state[:, 1] > self.y_boundary[1], 1] -= height
+
+        return new_state

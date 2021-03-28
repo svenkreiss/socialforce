@@ -76,8 +76,11 @@ def animation(n, movie_file=None, writer=None, **kwargs):
     plt.close(fig)
 
 
-def states(ax, states, *, labels=None, **kwargs):  # pylint: disable=redefined-outer-name
+def states(ax, states, *, labels=None, monochrome=False, **kwargs):  # pylint: disable=redefined-outer-name
     states = np.asarray(states)
+
+    if monochrome:
+        kwargs['color'] = 'black'
 
     for ped in range(states.shape[1]):
         x = states[:, ped, 0]
@@ -90,10 +93,16 @@ def states(ax, states, *, labels=None, **kwargs):  # pylint: disable=redefined-o
         marker_color = tracks[0].get_color()
         marker_alpha = tracks[0].get_alpha()
         marker_zorder = tracks[0].get_zorder()
+        marker_edgewidth = 0
+        marker_edgecolor = marker_color
+        if monochrome and states[0, ped, 2] < 0.0:
+            marker_color = 'white'
+            marker_edgewidth = 1
         ax.plot(states[0, ped:ped + 1, 0], states[0, ped:ped + 1, 1],
                 'o', color=marker_color,
                 alpha=marker_alpha,
-                markeredgewidth=0,
+                markeredgewidth=marker_edgewidth,
+                markeredgecolor=marker_edgecolor,
                 zorder=marker_zorder,
                 label='start' if ped == 0 else None)
         ax.plot(states[0, ped:ped + 1, 6], states[0, ped:ped + 1, 7],
