@@ -41,7 +41,7 @@ class Simulator(torch.nn.Module):
         self.oversampling = oversampling
 
         if integrator is None:
-            integrator = LeapfrogIntegrator(self.delta_t, velocity_postprocess=self.capped_velocity)
+            integrator = LeapfrogIntegrator(self.delta_t)
         self.integrator = integrator
 
         # potentials
@@ -92,12 +92,14 @@ class Simulator(torch.nn.Module):
             return None
         return -1.0 * self.U.grad_r_aB(state)
 
-    def capped_velocity(self, state, desired_velocity):
+    def cap_velocity(self, state):
         """Scale down a desired velocity to its capped speed."""
+        desired_velocity = state[:, 2:4]
         desired_speeds = torch.linalg.norm(desired_velocity, ord=2, dim=-1, keepdims=True)
         max_speeds = state[:, 9:10] * self.max_speed_multiplier
         factor = torch.clamp(max_speeds / desired_speeds, max=1.0)
-        return desired_velocity * factor
+        state[:, 2:4] = desired_velocity * factor
+        return state
 
     def forward(self, *args):
         """Do oversampling steps."""
@@ -141,7 +143,9 @@ class Simulator(torch.nn.Module):
         if F_aB is not None:
             F += torch.sum(F_aB, dim=1)
 
-        return self.integrator(state, F)
+        state = self.integrator(state, F)
+        state = self.cap_velocity(state)
+        return state
 
     def run(self, state, n_steps):
         state = self.normalize_state(state.clone().detach())
@@ -154,31 +158,25 @@ class Simulator(torch.nn.Module):
 
 
 class EulerIntegrator:
-    def __init__(self, delta_t, *, velocity_postprocess=None):
+    def __init__(self, delta_t):
         self.delta_t = delta_t
-        self.velocity_postprocess = velocity_postprocess
 
     def __call__(self, state, acceleration):
         # before applying updates to state, make a copy of it
         previous_state = state
         new_state = state.clone().detach()  # gradients will be connected below
 
-        # velocity
-        v = previous_state[:, 2:4] + self.delta_t * previous_state[:, 4:6]
-        if self.velocity_postprocess is not None:
-            v = self.velocity_postprocess(previous_state, v)
         # update state
-        new_state[:, 0:2] = previous_state[:, 0:2] + previous_state[:, 2:4] * self.delta_t
-        new_state[:, 2:4] = v
+        new_state[:, 0:2] = previous_state[:, 0:2] + self.delta_t * previous_state[:, 2:4]
+        new_state[:, 2:4] = previous_state[:, 2:4] + self.delta_t * previous_state[:, 4:6]
         new_state[:, 4:6] = acceleration
 
         return new_state
 
 
 class LeapfrogIntegrator:
-    def __init__(self, delta_t, *, velocity_postprocess=None):
+    def __init__(self, delta_t):
         self.delta_t = delta_t
-        self.velocity_postprocess = velocity_postprocess
 
     def __call__(self, state, acceleration):
         # before applying updates to state, make a copy of it
@@ -192,8 +190,6 @@ class LeapfrogIntegrator:
 
         # update velocity
         v = previous_state[:, 2:4] + 0.5 * (previous_state[:, 4:6] + acceleration) * self.delta_t
-        if self.velocity_postprocess is not None:
-            v = self.velocity_postprocess(previous_state, v)
         new_state[:, 2:4] = v
 
         # update acceleration
