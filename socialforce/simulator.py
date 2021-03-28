@@ -94,7 +94,7 @@ class Simulator(torch.nn.Module):
 
     def capped_velocity(self, state, desired_velocity):
         """Scale down a desired velocity to its capped speed."""
-        desired_speeds = torch.linalg.norm(desired_velocity, ord=2, dim=-1)
+        desired_speeds = torch.linalg.norm(desired_velocity, ord=2, dim=-1, keepdims=True)
         max_speeds = state[:, 9:10] * self.max_speed_multiplier
         factor = torch.clamp(max_speeds / desired_speeds, max=1.0)
         return desired_velocity * factor
@@ -144,7 +144,8 @@ class Simulator(torch.nn.Module):
         return self.integrator(state, F)
 
     def run(self, state, n_steps):
-        states = [state.clone().detach()]
+        state = self.normalize_state(state.clone().detach())
+        states = [state]
         for _ in range(n_steps):
             last_state = states[-1]
             states.append(self(last_state).clone())
