@@ -27,8 +27,8 @@ def track_canvas(image_file=None, show=True, tight_layout=True, **kwargs):
         this_ax.grid(linestyle='dotted')
         this_ax.set_aspect(1.0, 'datalim')
         this_ax.set_axisbelow(True)
-        this_ax.set_xlabel('x [m]')
-        this_ax.set_ylabel('y [m]')
+        this_ax.set_xlabel('$x_1$ [m]')
+        this_ax.set_ylabel('$x_2$ [m]')
 
     format_ax(ax)
 
