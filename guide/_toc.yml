@@ -21,6 +21,7 @@
   chapters:
   - file: corridor
 
-- part: Reference
+- part: References
   chapters:
   - file: modules
+  - file: bibliography
