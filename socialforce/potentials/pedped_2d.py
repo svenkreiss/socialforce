@@ -80,7 +80,10 @@ class PedPedPotentialDiamond(PedPedPotential2D):
             sigma_perp *= 1.0 + self.asymmetry * torch.sign(perpendicular_d)
         if self.speed_dependent:
             front = parallel_d > 0.0
-            sigma_parallel[front] += self.delta_t_step * speeds
+            # Given speeds are for pedestrian b. Need to make it of shape ab
+            # and repeat the values along the dimension for pedestrian a.
+            speeds_ab = torch.repeat_interleave(torch.unsqueeze(speeds, 0), speeds.shape[0], dim=0)
+            sigma_parallel[front] += self.delta_t_step * speeds_ab[front]
         l1 = torch.abs(perpendicular_d) / sigma_perp + torch.abs(parallel_d) / sigma_parallel
 
         return self.v0 * torch.clamp_min(1.0 - 0.5 * l1, 0.0)
