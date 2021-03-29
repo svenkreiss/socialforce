@@ -36,6 +36,10 @@ class PedPedPotential2D(torch.nn.Module):
         torch.diagonal(parallel_d)[:] = 0.0
         return parallel_d
 
+    @staticmethod
+    def asymmetry_factor(asymmetry, perpendicular_d):
+        return 1.0 / math.log(2.0) * torch.nn.functional.softplus(asymmetry * perpendicular_d)
+
     def perpendicular_d(self, r_ab, desired_directions):
         desired_directions_p = torch.matmul(desired_directions, self.rot90)
         perpendicular_d = torch.einsum('abj,bj->ab', r_ab, desired_directions_p)
@@ -48,19 +52,19 @@ class PedPedPotential2D(torch.nn.Module):
         value = self.value_b(b)
         if self.asymmetry != 0.0:
             perpendicular_d = self.perpendicular_d(r_ab, desired_directions)
-            factor = torch.clamp_min(1.0 + self.asymmetry * perpendicular_d, 0.0)
-            value = factor * value
+            value = self.asymmetry_factor(self.asymmetry, perpendicular_d) * value
         return value
 
 
 class PedPedPotentialDiamond(PedPedPotential2D):
     """Ped-ped interaction potential."""
-    def __init__(self, v0=2.1, sigma=0.3, asymmetry=0.0):
+    def __init__(self, v0=2.1, sigma=0.3, *, asymmetry=0.0, speed_dependent=False):
         super().__init__()
 
         self.v0 = v0
         self.sigma = sigma
         self.asymmetry = asymmetry
+        self.speed_dependent = speed_dependent
 
     def value_r_ab(self, r_ab, speeds, desired_directions):
         """Value of potential explicitely parametrized with r_ab."""
@@ -69,11 +73,17 @@ class PedPedPotentialDiamond(PedPedPotential2D):
 
         parallel_d = self.parallel_d(r_ab, desired_directions)
         perpendicular_d = self.perpendicular_d(r_ab, desired_directions)
-        l1 = torch.linalg.norm(
-            torch.stack((parallel_d, perpendicular_d), dim=-1),
-            ord=1, dim=-1,
-        )
-        return self.v0 * torch.clamp_min(1.0 - 0.5 / self.sigma * l1, 0.0)
+
+        sigma_perp = torch.full_like(perpendicular_d, self.sigma, requires_grad=False)
+        sigma_parallel = torch.full_like(parallel_d, self.sigma, requires_grad=False)
+        if self.asymmetry != 0.0:
+            sigma_perp *= 1.0 + self.asymmetry * torch.sign(perpendicular_d)
+        if self.speed_dependent:
+            front = parallel_d > 0.0
+            sigma_parallel[front] += self.delta_t_step * speeds
+        l1 = torch.abs(perpendicular_d) / sigma_perp + torch.abs(parallel_d) / sigma_parallel
+
+        return self.v0 * torch.clamp_min(1.0 - 0.5 * l1, 0.0)
 
 
 class PedPedPotentialMLP1p1D(PedPedPotential2D):
