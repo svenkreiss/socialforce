@@ -98,6 +98,8 @@ class Simulator(torch.nn.Module):
         desired_speeds = torch.linalg.norm(desired_velocity, ord=2, dim=-1, keepdims=True)
         max_speeds = state[:, 9:10] * self.max_speed_multiplier
         factor = torch.clamp(max_speeds / desired_speeds, max=1.0)
+
+        state = torch.clone(state)
         state[:, 2:4] = desired_velocity * factor
         return state
 
