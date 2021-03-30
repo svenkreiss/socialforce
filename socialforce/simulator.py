@@ -130,7 +130,7 @@ class Simulator(torch.nn.Module):
         if f_ab is not None and self.w is not None and self.w != -1:
             # w = self.w(e, -f_ab).unsqueeze(-1).detach()
             r_ab = PedPedPotential.r_ab(state)
-            w = self.w(e, r_ab).unsqueeze(-1).detach()
+            w = self.w(e, -r_ab).unsqueeze(-1).detach()
             F_ab = w * f_ab
         else:
             F_ab = f_ab
