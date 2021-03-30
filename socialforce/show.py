@@ -216,7 +216,7 @@ def potential2D(V, ax, nx=600, ny=400, **kwargs):
     ax.plot([0.0], [0.0], '-', label=r'$V$', color='seagreen')  # just for legend
 
     ax.plot([0.0], [0.0], 'o', label='pedestrian', markersize=5.0, color='black')
-    ax.arrow(0.0, 0.0, 0.4, 0.0, width=0.01, zorder=10)
+    ax.arrow(0.0, 0.0, 0.4, 0.0, width=0.01, zorder=10, color='black')
     ax.set_xlabel('$x_1$ [m]')
     ax.set_ylabel('$x_2$ [m]')
     ax.set_aspect('equal')
@@ -252,7 +252,7 @@ def potential2D_grad(V, ax, nx=600, ny=400, **kwargs):
     ax.plot([0.0], [0.0], '-', label=r'$|\nabla V|$', color='seagreen')  # just for legend
 
     ax.plot([0.0], [0.0], 'o', label='pedestrian', markersize=5.0, color='black')
-    ax.arrow(0.0, 0.0, 0.4, 0.0, width=0.01, zorder=10)
+    ax.arrow(0.0, 0.0, 0.4, 0.0, width=0.01, zorder=10, color='black')
     ax.set_xlabel('$x_1$ [m]')
     ax.set_ylabel('$x_2$ [m]')
     ax.set_aspect('equal')
