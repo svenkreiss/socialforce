@@ -45,7 +45,7 @@ class ParallelOvertake:
     def generate(self, n):
         # ped0 always left to right
         speed0 = 0.7 + 0.4 * torch.rand(1).item()
-        ped0 = [-5.0, 0.0, speed0, 0.0, 5.0, 0.0, 0.5]
+        ped0 = [-5.0, 0.0, speed0, 0.0, 6.0, 0.0, 0.5]
 
         generator_initial_states = []
         for b in -1.0 + 2.0 * torch.rand(n):
