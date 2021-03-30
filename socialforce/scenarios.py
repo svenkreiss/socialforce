@@ -11,7 +11,7 @@ class Circle:
         self.ped_ped = ped_ped or potentials.PedPedPotential(2.1)
         self.simulator = Simulator(ped_ped=self.ped_ped, **kwargs)
 
-    def generate(self, n):
+    def generate(self, n, *, steps_per_scenario=21):
         # ped0 always left to right
         speed0 = 0.7 + 0.4 * torch.rand(1).item()
         ped0 = np.array([-5.0, 0.0, speed0, 0.0, 6.0, 0.0])
@@ -32,7 +32,7 @@ class Circle:
 
         with torch.no_grad():
             return [
-                self.simulator.run(initial_state, 21)
+                self.simulator.run(initial_state, steps_per_scenario)
                 for initial_state in generator_initial_states
             ]
 
