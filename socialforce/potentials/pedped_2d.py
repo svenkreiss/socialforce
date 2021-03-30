@@ -58,7 +58,11 @@ class PedPedPotential2D(torch.nn.Module):
 
 class PedPedPotentialDiamond(PedPedPotential2D):
     """Ped-ped interaction potential."""
-    def __init__(self, v0=2.1, sigma=0.3, *, asymmetry=0.0, asymmetry_offset=0.0, speed_dependent=False):
+    def __init__(self, v0=2.1, sigma=0.3, *,
+                 asymmetry=0.0,
+                 asymmetry_offset=0.0,
+                 asymmetry_angle=0.0,
+                 speed_dependent=False):
         super().__init__()
 
         self.v0 = v0
@@ -67,10 +71,23 @@ class PedPedPotentialDiamond(PedPedPotential2D):
         self.asymmetry_offset = asymmetry_offset
         self.speed_dependent = speed_dependent
 
+        if asymmetry_angle:
+            asymmetry_angle *= math.pi / 180.0
+            self.register_buffer('asymmetry_rotation', torch.tensor([
+                [math.cos(asymmetry_angle), math.sin(asymmetry_angle)],
+                [-math.sin(asymmetry_angle), math.cos(asymmetry_angle)],
+            ]))
+        else:
+            self.asymmetry_rotation = None
+
     def value_r_ab(self, r_ab, speeds, desired_directions):
         """Value of potential explicitely parametrized with r_ab."""
         assert speeds.requires_grad is False
         assert desired_directions.requires_grad is False
+
+        if self.asymmetry_rotation is not None:
+            desired_directions = torch.einsum(
+                'ai,ij->aj', desired_directions, self.asymmetry_rotation)
 
         parallel_d = self.parallel_d(r_ab, desired_directions)
         perpendicular_d = self.perpendicular_d(r_ab, desired_directions)
