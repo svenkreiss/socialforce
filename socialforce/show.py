@@ -77,8 +77,10 @@ def animation(n, movie_file=None, writer=None, **kwargs):
     plt.close(fig)
 
 
-def state_animation(ax, all_states, *, delta_t=0.4, movie_file=None, writer=None, **kwargs):
-    actors = []
+def state_animation(ax, all_states, *,
+                    delta_t=0.4, movie_file=None, writer=None, show_speed=False, **kwargs):
+    pedestrian_actors = []
+    text_actors = []
 
     for ped in range(all_states.shape[1]):
         speed = np.linalg.norm(all_states[0, ped, 2:4])
@@ -86,17 +88,23 @@ def state_animation(ax, all_states, *, delta_t=0.4, movie_file=None, writer=None
         p = plt.Circle(all_states[0, ped, 0:2], radius=radius,
                         facecolor='black' if all_states[0, ped, 6] > 0 else 'white',
                         edgecolor='black', zorder=10.0)
-        actors.append(p)
+        pedestrian_actors.append(p)
         ax.add_patch(p)
-        ax.set_xlim(-25, 25)
+        if show_speed:
+            t = ax.text(0.1, 0.9 - 0.08 * ped, '', transform=ax.transAxes)
+            text_actors.append(t)
 
     def update(i):
-        for ped, p in enumerate(actors):
+        for ped, p in enumerate(pedestrian_actors):
             # p.set_data(all_states[i:i+5, ped, 0], all_states[i:i+5, ped, 1])
             p.center = all_states[i, ped, 0:2]
             speed = np.linalg.norm(all_states[i, ped, 2:4])
             p.set_radius(0.2 + speed / 2.0 * 0.3)
-        return actors
+            if show_speed:
+                acc = np.linalg.norm(all_states[i, ped, 4:6])
+                text_actors[ped].set_text(
+                    '$v_{ped} = {:.2f}m/s, a_{ped} = {:.2f}m/s^2$'.format(speed, acc, ped=ped))
+        return pedestrian_actors + text_actors
 
     ani = mpl_animation.FuncAnimation(
         ax.get_figure(), update,
