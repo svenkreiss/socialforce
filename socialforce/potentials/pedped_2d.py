@@ -62,7 +62,7 @@ class PedPedPotentialDiamond(PedPedPotential2D):
                  asymmetry=0.0,
                  asymmetry_offset=0.0,
                  asymmetry_angle=0.0,
-                 speed_dependent=False):
+                 speed_dependent=True):
         super().__init__()
 
         self.v0 = v0
@@ -148,7 +148,7 @@ class PedPedPotentialMLP2D(PedPedPotential2D):
                  hidden_units=16,
                  n_fourier_features=None,
                  fourier_scale=1.0,
-                 fourier_features_tanh=True):
+                 tanh_range=2.0):
         super().__init__()
 
         input_features = 3
@@ -160,7 +160,7 @@ class PedPedPotentialMLP2D(PedPedPotential2D):
         else:
             self.fourier_featurizer = None
         self.fourier_scale = fourier_scale
-        self.fourier_features_tanh = fourier_features_tanh
+        self.tanh_range = tanh_range
 
         lin1 = torch.nn.Linear(input_features, hidden_units)
         lin2 = torch.nn.Linear(hidden_units, hidden_units)
@@ -179,16 +179,15 @@ class PedPedPotentialMLP2D(PedPedPotential2D):
             self.parallel_d(r_ab, desired_directions),
         ), dim=-1)
 
+        if self.tanh_range is not None:
+            input_vector = self.tanh_range * torch.tanh(input_vector / self.tanh_range)
         if self.fourier_featurizer is not None:
             input_vector = self.fourier_features(input_vector)
 
         return input_vector
 
     def fourier_features(self, input_vector):
-        if self.fourier_features_tanh:
-            input_vector = 2.0 * math.pi * torch.tanh(input_vector / self.fourier_scale)
-        else:
-            input_vector = 2.0 * math.pi * input_vector / self.fourier_scale
+        input_vector = 2.0 * math.pi / self.fourier_scale * input_vector
         ff = torch.matmul(input_vector, self.fourier_featurizer)
         ff = torch.cat((torch.sin(ff), torch.cos(ff)), dim=-1)
         return ff
