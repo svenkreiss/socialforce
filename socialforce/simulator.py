@@ -54,6 +54,7 @@ class Simulator(torch.nn.Module):
     def normalize_state(self, state):
         if not isinstance(state, torch.Tensor):
             state = torch.tensor(state, dtype=self.dtype)
+        assert len(state.shape) == 2
 
         if state.shape[1] == 4:
             # accelerations and destinations not given
@@ -71,9 +72,11 @@ class Simulator(torch.nn.Module):
             state = torch.cat((state[:, :4], no_accelerations, state[:, 4:]), dim=-1)
         if state.shape[1] == 8:
             # tau not given
-            if not hasattr(self.tau, 'shape'):
-                self.tau = self.tau * torch.ones(state.shape[0], dtype=state.dtype)
-            state = torch.cat((state, self.tau.unsqueeze(-1)), dim=-1)
+            if hasattr(self.tau, 'shape'):
+                tau = self.tau
+            else:
+                tau = self.tau * torch.ones(state.shape[0], dtype=state.dtype)
+            state = torch.cat((state, tau.unsqueeze(-1)), dim=-1)
         if state.shape[1] == 9:
             # preferred speed not given
             preferred_speeds = stateutils.speeds(state)

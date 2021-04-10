@@ -134,7 +134,7 @@ class PedPedPotentialWall(PedPedPotential):
 class PedPedPotentialMLP(PedPedPotential):
     """Ped-ped interaction potential."""
 
-    def __init__(self, *, hidden_units=5, small_init=False):
+    def __init__(self, *, hidden_units=5, small_init=False, dropout_p=0.0):
         super().__init__()
 
         lin1 = torch.nn.Linear(1, hidden_units)
@@ -147,10 +147,17 @@ class PedPedPotentialMLP(PedPedPotential):
             torch.nn.init.normal_(lin2.weight, std=0.03)
             torch.nn.init.normal_(lin2.bias, std=0.03)
 
-        self.mlp = torch.nn.Sequential(
-            lin1, torch.nn.Softplus(),
-            lin2, torch.nn.Softplus(),
-        )
+        if dropout_p == 0.0:
+            self.mlp = torch.nn.Sequential(
+                lin1, torch.nn.Softplus(),
+                lin2, torch.nn.Softplus(),
+            )
+        else:
+            self.mlp = torch.nn.Sequential(
+                lin1, torch.nn.Softplus(), torch.nn.Dropout(dropout_p),
+                lin2, torch.nn.Softplus(),
+            )
+
 
     def value_b(self, b):
         """Calculate value given b."""

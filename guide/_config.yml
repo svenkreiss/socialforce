@@ -6,6 +6,7 @@ author: <a href="https://www.svenkreiss.com">Sven Kreiss</a> and <a href="https:
 copyright: "2020-2021"
 email: research@svenkreiss.com
 logo: logo.png
+# only_build_toc_files: true  # Auto-exclude files not in the toc
 
 # Force re-execution of notebooks on each build.
 # See https://jupyterbook.org/content/execute.html

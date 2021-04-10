@@ -33,12 +33,16 @@ class Trainer:
         ]
         n_total = len(experience)
 
-        def keep(state):
-            small_distance = PedPedPotential.norm_r_ab(PedPedPotential.r_ab(state)) < radius
-            torch.diagonal(small_distance)[:] = False
-            return torch.any(small_distance, dim=-1)
+        def keep(state1, state2):
+            valid_state1 = torch.isfinite(state1[:, 0])
+            valid_state2 = torch.isfinite(state2[:, 0])
 
-        keep_pedestrians = [keep(state) for state, _ in experience]
+            small_distance = PedPedPotential.norm_r_ab(PedPedPotential.r_ab(state1)) < radius
+            torch.diagonal(small_distance)[:] = False
+
+            return valid_state1 & valid_state2 & torch.any(small_distance, dim=-1)
+
+        keep_pedestrians = [keep(state1, state2) for state1, state2 in experience]
         experience = [
             (state1[k], state2[k])
             for k, (state1, state2) in zip(keep_pedestrians, experience)
