@@ -10,7 +10,7 @@ def desired_directions(state):
     # support for prediction without given destination:
     # "desired_direction" is in the direction of the current velocity
     invalid_destination = torch.isnan(destination_vectors[:, 0])
-    destination_vectors[invalid_destination] = state[:, 2:4]
+    destination_vectors[invalid_destination] = state[invalid_destination, 2:4]
 
     norm_factors = torch.linalg.norm(destination_vectors, ord=2, dim=-1)
     norm_factors[norm_factors == 0.0] = 1.0
