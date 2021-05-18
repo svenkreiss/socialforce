@@ -86,8 +86,8 @@ def state_animation(ax, all_states, *,
         speed = np.linalg.norm(all_states[0, ped, 2:4])
         radius = 0.2 + speed / 2.0 * 0.3
         p = plt.Circle(all_states[0, ped, 0:2], radius=radius,
-                        facecolor='black' if all_states[0, ped, 6] > 0 else 'white',
-                        edgecolor='black', zorder=10.0)
+                       facecolor='black' if all_states[0, ped, 6] > 0 else 'white',
+                       edgecolor='black', zorder=10.0)
         pedestrian_actors.append(p)
         ax.add_patch(p)
         if show_speed:
@@ -257,3 +257,18 @@ def potential2D_grad(V, ax, nx=600, ny=400, **kwargs):
     ax.set_ylabel('$x_2$ [m]')
     ax.set_aspect('equal')
     ax.legend()
+
+
+def experience(ax, experiences, *, reference_ped=0, **kwargs):
+    ax.axhline(0.0, ls='dotted', color='gray')
+    ax.axvline(0.0, ls='dotted', color='gray')
+
+    for t0, t1 in experiences:
+        for other_i in range(t0.shape[0]):
+            if other_i == reference_ped:
+                continue
+            diff_t0 = t0[other_i] - t0[reference_ped]
+            diff_t1 = t1[other_i] - t1[reference_ped]
+            x = [diff_t0[0], diff_t1[0]]
+            y = [diff_t0[1], diff_t1[1]]
+            ax.plot(x, y, '-o', markersize=2.5, markeredgewidth=0, **kwargs)

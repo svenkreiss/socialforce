@@ -146,30 +146,40 @@ class PedPedPotentialMLP2D(PedPedPotential2D):
     """Ped-ped interaction potential."""
     def __init__(self, *,
                  hidden_units=16,
+                 n_hidden_layers=1,
                  n_fourier_features=None,
+                 n_spherical_features=None,
                  fourier_scale=1.0,
                  tanh_range=2.0):
         super().__init__()
 
         input_features = 3
 
+        assert not (n_fourier_features and n_spherical_features)
         if n_fourier_features:
-            fourier_featurizer = torch.randn((input_features, n_fourier_features // 2))
-            self.register_buffer('fourier_featurizer', fourier_featurizer)
-            input_features = n_fourier_features
+            fourier_featurizer = torch.randn((n_fourier_features // 2,))
+            self.register_buffer('featurizer', fourier_featurizer)
+            input_features *= n_fourier_features
+        elif n_spherical_features:
+            spherical_featurizer = torch.randn((input_features, n_spherical_features // 2))
+            self.register_buffer('featurizer', spherical_featurizer)
+            input_features = n_spherical_features
         else:
-            self.fourier_featurizer = None
+            self.featurizer = None
         self.fourier_scale = fourier_scale
         self.tanh_range = tanh_range
 
-        lin1 = torch.nn.Linear(input_features, hidden_units)
-        lin2 = torch.nn.Linear(hidden_units, hidden_units)
-        lin3 = torch.nn.Linear(hidden_units, 1)
+        lin_in = torch.nn.Linear(input_features, hidden_units)
+        lin_hidden = [torch.nn.Linear(hidden_units, hidden_units)
+                      for _ in range(n_hidden_layers)]
+        lin_out = torch.nn.Linear(hidden_units, 1)
 
+        # activation_function = torch.nn.Softplus
+        activation_function = lambda: torch.nn.Softplus(beta=5)
         self.mlp = torch.nn.Sequential(
-            lin1, torch.nn.Softplus(),
-            lin2, torch.nn.Softplus(),
-            lin3, torch.nn.Softplus(),
+            lin_in, activation_function(),
+            *[layer for lin in lin_hidden for layer in (lin, activation_function())],
+            lin_out, torch.nn.Softplus(),
         )
 
     def input_features(self, r_ab, speeds, desired_directions):
@@ -181,14 +191,19 @@ class PedPedPotentialMLP2D(PedPedPotential2D):
 
         if self.tanh_range is not None:
             input_vector = self.tanh_range * torch.tanh(input_vector / self.tanh_range)
-        if self.fourier_featurizer is not None:
+        if self.featurizer is not None:
             input_vector = self.fourier_features(input_vector)
 
         return input_vector
 
     def fourier_features(self, input_vector):
         input_vector = 2.0 * math.pi / self.fourier_scale * input_vector
-        ff = torch.matmul(input_vector, self.fourier_featurizer)
+        if len(self.featurizer.shape) > 1:  # spherical
+            ff = torch.matmul(input_vector, self.featurizer)
+        else:
+            ff = torch.matmul(torch.unsqueeze(input_vector, -1),
+                              torch.unsqueeze(self.featurizer, 0))
+            ff = torch.reshape(ff, list(ff.shape)[:-2] + [-1])
         ff = torch.cat((torch.sin(ff), torch.cos(ff)), dim=-1)
         return ff
 

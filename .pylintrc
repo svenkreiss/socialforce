@@ -1,7 +1,7 @@
 [BASIC]
 
 variable-rgx=[a-z0-9_]{1,30}$
-good-names=ax,b,e,f,f_aB,F0,F_ab,F_aB,F,grad_r_aB,i,lr,n,nx,ny,xy,r,r_aB,U,u0,V,v0,value_r_ab,value_r_aB,V,w,X,Y
+good-names=ax,b,e,f,f_aB,F0,F_ab,F_aB,F,grad_r_aB,i,lr,n,nx,ny,xy,r,r_aB,U,u0,V,v0,value_r_ab,value_r_aB,V,w,x,y,X,Y
 
 [TYPECHECK]
 

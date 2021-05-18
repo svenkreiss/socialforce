@@ -37,7 +37,10 @@ class Trainer:
             valid_state1 = torch.isfinite(state1[:, 0])
             valid_state2 = torch.isfinite(state2[:, 0])
 
-            small_distance = PedPedPotential.norm_r_ab(PedPedPotential.r_ab(state1)) < radius
+            small_distance = (
+                (PedPedPotential.norm_r_ab(PedPedPotential.r_ab(state1)) < radius)
+                | (PedPedPotential.norm_r_ab(PedPedPotential.r_ab(state2)) < radius)
+            )
             torch.diagonal(small_distance)[:] = False
 
             return valid_state1 & valid_state2 & torch.any(small_distance, dim=-1)

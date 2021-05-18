@@ -10,9 +10,10 @@ class FieldOfView:
     The field of view angle twophi is given in degrees.
     out_of_view_factor is C in the paper.
     """
-    def __init__(self, twophi=200.0, out_of_view_factor=0.5):
+    out_of_view_factor = 0.5
+
+    def __init__(self, twophi=200.0):
         self.cosphi = math.cos(twophi / 2.0 / 180.0 * math.pi)
-        self.out_of_view_factor = out_of_view_factor
 
     def __call__(self, e, f):
         """Weighting factor for field of view.
