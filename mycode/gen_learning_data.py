@@ -182,10 +182,21 @@ def main():
     output_num = 6
     base_file_name = 'output'
     simulation_length = 150
+    vel_mean_list = np.array([[]])
+    agents_list = np.array([])
     for i in range(1, output_num + 1):
         print(f"creating images({i}/{output_num})")
         states, space = setup(simulation_length)
+        np.append(vel_mean_list, np.mean(states, axis=2), axis=0)
+        np.append(agents_list, states.shape(1))
+        obstacle_agents = create_obstacle_agents(space, simulation_length)
+        moving_agent = create_moving_agents(states)
         visualize(states, space, f'mycode/img/{base_file_name + str(i)}.gif')
+    acc_mean_list = np.diff(vel_mean_list, axis=0)
+    vel_mean = np.mean(vel_mean_list, axis=1)
+    acc_mean = np.mean(acc_mean_list, axis=1)
+    vel_std = np.mean((vel_mean_list - vel_mean) ** 2, axis=3)
+    acc_std = np.mean((acc_mean_list - acc_mean) ** 2, axis=3)
     
 
 
