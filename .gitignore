@@ -11,3 +11,7 @@ dist/
 
 # OS
 .DS_Store
+
+# image
+docs/
+mycode/img/
