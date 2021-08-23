@@ -3,9 +3,11 @@ Simulate crowd flow by Social Force Model
 Provide training data for GNS
 """
 
+from os import times
 import random
 import json
 from typing import List, Tuple
+from numpy.core.defchararray import array
 import tensorflow as tf
 
 import matplotlib.pyplot as plt
@@ -182,13 +184,34 @@ def main():
     output_num = 6
     base_file_name = 'output'
     simulation_length = 150
-    vel_mean_list = np.array([[]])
-    agents_list = np.array([])
-    for i in range(1, output_num + 1):
-        print(f"creating images({i}/{output_num})")
+    vel_mean_list: np.array
+    timestep_num_list = np.array([])
+    agents_num_list = np.array([])
+    for i in range(output_num):
+        print(f"creating images({i + 1}/{output_num})")
         states, space = setup(simulation_length)
-        np.append(vel_mean_list, np.mean(states, axis=2), axis=0)
-        np.append(agents_list, states.shape(1))
+        timestep_num_list = np.append(timestep_num_list, states.shape[0])
+        agents_num_list = np.append(agents_num_list, states.shape[1])
+        if 'vel_mean_list' not in locals():
+            vel_mean_list = np.array([np.mean(states[:,:,2:4], axis=(0,1))])
+            first_step_vel_mean = np.mean(states[0,:,2:4], axis=0)
+            final_step_vel_mean = np.mean(states[-1,:,2:4], axis=0)
+            try:
+                # acc_mean = (\bar{v_(L+1)} - \bar{v_1}) / L
+                acc_mean_list = np.array([(final_step_vel_mean - first_step_vel_mean) / (timestep_num_list[i] - 1)])
+            except ZeroDivisionError as e:
+                print(e)
+                print("Simulation timestep should be more than 1.")
+        else:
+            vel_mean_list = np.append(vel_mean_list, np.array([np.mean(states[:,:,2:4], axis=(0,1))]), axis=0)
+            first_step_vel_mean = np.mean(states[0,:,2:4], axis=0)
+            final_step_vel_mean = np.mean(states[-1,:,2:4], axis=0)
+            try:
+                # acc_mean = (\bar{v_(L+1)} - \bar{v_1}) / L
+                acc_mean_list = np.append(acc_mean_list, np.array([(final_step_vel_mean - first_step_vel_mean) / (timestep_num_list[i] - 1)]), axis=0)
+            except ZeroDivisionError as e:
+                print(e)
+                print("Simulation timestep should be more than 1.")
         obstacle_agents = create_obstacle_agents(space, simulation_length)
         moving_agent = create_moving_agents(states)
         visualize(states, space, f'mycode/img/{base_file_name + str(i)}.gif')
