@@ -19,30 +19,6 @@ State = np.ndarray
 States = np.ndarray  # time-series data of State
 Space = List[np.ndarray]
 
-# Create a description of the features.
-_FEATURE_DESCRIPTION = {
-    'position': tf.io.VarLenFeature(tf.string),
-}
-
-_FEATURE_DESCRIPTION_WITH_GLOBAL_CONTEXT = _FEATURE_DESCRIPTION.copy()
-_FEATURE_DESCRIPTION_WITH_GLOBAL_CONTEXT['step_context'] = tf.io.VarLenFeature(
-    tf.string)
-
-_FEATURE_DTYPES = {
-    'position': {
-        'in': np.float32,
-        'out': tf.float32
-    },
-    'step_context': {
-        'in': np.float32,
-        'out': tf.float32
-    }
-}
-
-_CONTEXT_FEATURES = {
-    'key': tf.io.FixedLenFeature([], tf.int64, default_value=0),
-    'particle_type': tf.io.VarLenFeature(tf.string)
-}
 
 
 def random_agent_pos() -> Position:
@@ -128,7 +104,8 @@ def visualize(states: States, space: Space, output_filename: str) -> None:
 
 def setup(simulation_length: int) -> Tuple[States, Space]:
     """Set up space and states"""
-    agent_num = random.randrange(3, 8)
+    # agent_num = random.randrange(3, 8)
+    agent_num = 50
     initial_state = setup_state(agent_num)
     y_min = -2.0
     y_max = 2.0
@@ -165,28 +142,29 @@ def create_json(metadata: dict) -> None:
         json.dump(metadata, f)
 
 
-def create_tfrecord(position_list: np.ndarray) -> None:
+def create_tfrecord(position_list: np.ndarray, particle_type: np.ndarray) -> None:
     file_path = "/tmp/datasets/SocialForceModel/train.tfrecord"
-    with tf.python_io.TFRecordWriter(file_path) as w:
-        context = tf.train.Features(feature={
-            'key': tf.train.Feature(int64_list=tf.train.Int64List(value=[0])),
-            'particle_type': tf.train.Feature(bytes_list=tf.train.BytesList(value=[]))
-        })
-        description_feature = [tf.train.Feature(
-            int64_list=tf.train.Int64List(value=[v])) for v in position_list
-        ]
-        feature_lists = tf.train.FeatureLists(feature_list={
-            "position": tf.train.FeatureList(feature=description_feature)
-        })
+    with tf.Session():
+        with tf.python_io.TFRecordWriter(file_path) as w:
+            context = tf.train.Features(feature={
+                'key': tf.train.Feature(int64_list=tf.train.Int64List(value=[0])),
+                'particle_type': tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.io.serialize_tensor(particle_type).eval()]))
+            })
+            description_feature = [tf.train.Feature(
+                bytes_list=tf.train.BytesList(value=[tf.io.serialize_tensor(v).eval()])) for v in position_list
+            ]
+            feature_lists = tf.train.FeatureLists(feature_list={
+                "position": tf.train.FeatureList(feature=description_feature)
+            })
 
-        sequence_example = tf.train.SequenceExample(context=context,
-                                                    feature_lists=feature_lists)
-        w.write(sequence_example.SerializeToString())
+            sequence_example = tf.train.SequenceExample(context=context,
+                                                        feature_lists=feature_lists)
+            w.write(sequence_example.SerializeToString())
 
 
 def main():
     """Output multiple simulation results and each animations"""
-    output_num = 3
+    output_num = 10
     base_file_name = 'output'
     simulation_length = 150
     vel_mean_list: np.array
@@ -230,7 +208,11 @@ def main():
                 (np.diff(states[:, :, 2:4], axis=0) - acc_mean_list[i]) ** 2, axis=(0, 1))]), axis=0)
         obstacle_agents = create_obstacle_agents(space, simulation_length)
         moving_agent = create_moving_agents(states)
-        visualize(states, space, f'mycode/img/{base_file_name + str(i)}.gif')
+        obstacle_row = [3] * obstacle_agents.shape[1]
+        moving_row = [6] * moving_agent.shape[1]
+        agents_row = obstacle_row + moving_row
+        create_tfrecord(np.concatenate([obstacle_agents, moving_agent], axis=1), np.array(agents_row))
+        # visualize(states, space, f'mycode/img/{base_file_name + str(i)}.gif')
     vel_mean = np.sum(vel_mean_list * timestep_num_list.reshape((-1, 1)) * agents_num_list.reshape((-1, 1)),
                       axis=0) / np.sum(timestep_num_list * agents_num_list)
     acc_mean = np.sum(acc_mean_list * (timestep_num_list.reshape((-1, 1)) - 1) * agents_num_list.reshape((-1, 1)),
@@ -247,7 +229,8 @@ def main():
     print(acc_std)
     metadata: dict = {
         'bounds': [[-15.0, 15.0], [-10.0, 10.0]],
-        'sequence_length': 150,
+        'sequence_length': simulation_length,
+        'default_connectivity_radius': 0.2,
         'dim': 2,
         'dt': 0.4,
         'vel_mean': vel_mean.tolist(),
