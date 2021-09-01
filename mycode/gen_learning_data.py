@@ -186,7 +186,7 @@ def create_tfrecord(position_list: np.ndarray) -> None:
 
 def main():
     """Output multiple simulation results and each animations"""
-    output_num = 6
+    output_num = 3
     base_file_name = 'output'
     simulation_length = 150
     vel_mean_list: np.array
@@ -245,6 +245,17 @@ def main():
     print(acc_mean)
     print(vel_std)
     print(acc_std)
+    metadata: dict = {
+        'bounds': [[-15.0, 15.0], [-10.0, 10.0]],
+        'sequence_length': 150,
+        'dim': 2,
+        'dt': 0.4,
+        'vel_mean': vel_mean.tolist(),
+        'vel_std': vel_std.tolist(),
+        'acc_mean': acc_mean.tolist(),
+        'acc_std': acc_std.tolist()
+    }
+    create_json(metadata)
 
 
 if __name__ == '__main__':
