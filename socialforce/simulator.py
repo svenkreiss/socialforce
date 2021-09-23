@@ -21,6 +21,7 @@ class Simulator(torch.nn.Module):
     destination and tau are optional in this vector.
 
     ped_space is an instance of PedSpacePotential.
+    ped_ped is an instance of PedPedPotential.
 
     delta_t in seconds.
     tau in seconds: either float or numpy array of shape[n_ped].
