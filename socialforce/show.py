@@ -77,8 +77,9 @@ def animation(n, movie_file=None, writer=None, **kwargs):
     plt.close(fig)
 
 
+# pylint: disable=too-many-locals
 def state_animation(ax, all_states, *,
-                    delta_t=0.4, movie_file=None, writer=None, show_speed=False, **kwargs):
+                    delta_t=0.4, movie_file=None, writer=None, show_speed=False):
     pedestrian_actors = []
     text_actors = []
 
@@ -157,7 +158,7 @@ def space(ax, ped_space_potential):
         ax.plot(s[:, 0], s[:, 1], '-o', color='black', markersize=2.5)
 
 
-def potential1D(V, ax1, ax2=None, **kwargs):
+def potential_1d(V, ax1, ax2=None, **kwargs):
     parameters = list(V.parameters())
     dtype = parameters[0].dtype if parameters else torch.float32
     b = torch.linspace(0.0, 3.0, 200, dtype=dtype)
@@ -181,14 +182,15 @@ def potential1D(V, ax1, ax2=None, **kwargs):
         ax2.legend()
 
 
-def potential1D_parametric(V, ax1, ax2=None, label=None, sigma_label=None, linestyle=None, **kwargs):
-    potential1D(V, ax1, ax2, linestyle=linestyle, label=label, **kwargs)
+def potential_1d_parametric(V, ax1, ax2=None, label=None, sigma_label=None,
+                            linestyle=None, **kwargs):
+    potential_1d(V, ax1, ax2, linestyle=linestyle, label=label, **kwargs)
     ax1.axvline(V.sigma, linestyle='dotted', label=sigma_label, **kwargs)
     if ax2 is not None:
         ax2.axvline(V.sigma, linestyle='dotted', label=sigma_label, **kwargs)
 
 
-def potential2D(V, ax, nx=600, ny=400, **kwargs):
+def potential_2d(V, ax, nx=600, ny=400, **kwargs):
     # the "pedestrian of interest" is beta and the probe pedestrians are alpha
 
     parameters = list(V.parameters())
@@ -211,7 +213,8 @@ def potential2D(V, ax, nx=600, ny=400, **kwargs):
         values = values.view((len(x1), len(x2)))
 
     ax.clabel(
-        ax.contour(x1, x2, values.T, levels=np.linspace(0.1, 1.5, 15), vmin=0.1, vmax=1.5, **kwargs),
+        ax.contour(x1, x2, values.T,
+                   levels=np.linspace(0.1, 1.5, 15), vmin=0.1, vmax=1.5, **kwargs),
         inline=1, fontsize=10)
     ax.plot([0.0], [0.0], '-', label=r'$V$', color='seagreen')  # just for legend
 
@@ -223,7 +226,7 @@ def potential2D(V, ax, nx=600, ny=400, **kwargs):
     ax.legend()
 
 
-def potential2D_grad(V, ax, nx=600, ny=400, **kwargs):
+def potential_2d_grad(V, ax, nx=600, ny=400, **kwargs):
     # the "pedestrian of interest" is beta and the probe pedestrians are alpha
 
     parameters = list(V.parameters())
@@ -247,7 +250,8 @@ def potential2D_grad(V, ax, nx=600, ny=400, **kwargs):
         values = values.view((len(x1), len(x2)))
 
     ax.clabel(
-        ax.contour(x1, x2, values.T, levels=np.linspace(0.1, 1.5, 15), vmin=0.1, vmax=1.5, **kwargs),
+        ax.contour(x1, x2, values.T,
+                   levels=np.linspace(0.1, 1.5, 15), vmin=0.1, vmax=1.5, **kwargs),
         inline=1, fontsize=10)
     ax.plot([0.0], [0.0], '-', label=r'$|\nabla V|$', color='seagreen')  # just for legend
 

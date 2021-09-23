@@ -57,6 +57,7 @@ class Trainer:
         return experience
 
     def epoch(self, train_experience, val_experience=None):
+        assert val_experience is None, 'TODO'  # TODO
         random.shuffle(train_experience)
 
         n_batches = 0

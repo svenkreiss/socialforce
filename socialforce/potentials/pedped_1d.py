@@ -158,7 +158,6 @@ class PedPedPotentialMLP(PedPedPotential):
                 lin2, torch.nn.Softplus(),
             )
 
-
     def value_b(self, b):
         """Calculate value given b."""
         b = torch.clamp(b, max=100.0)
