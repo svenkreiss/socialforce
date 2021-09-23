@@ -1,0 +1,40 @@
+name: deploy-guide
+
+on:
+  push:
+    branches:
+    - main
+    - torch
+  # release:
+  #   types:
+  #     - released
+
+# This job installs dependencies, build the guide, and pushes it to `gh-pages`
+jobs:
+  deploy-guide:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+
+    - name: Install PyTorch without CUDA
+      run: pip install torch==1.9.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+
+    - name: Install dependencies
+      run: |
+        pip install .[dev,plot]
+
+    - name: Build the guide
+      run: cd guide && jupyter-book build -W --keep-going .
+
+    # Push the book's HTML to gh-pages
+    - name: GitHub Pages action
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        personal_token: ${{ secrets.PERSONAL_TOKEN }}
+        publish_dir: ./guide/_build/html
+        force_orphan: true  # https://github.com/peaceiris/actions-gh-pages/issues/455

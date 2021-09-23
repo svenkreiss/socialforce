@@ -33,7 +33,6 @@ setup(
         'plot': [
             'flameprof',
             'matplotlib',
-            'scipy',
         ],
     },
 
