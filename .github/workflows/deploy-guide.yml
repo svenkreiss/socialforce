@@ -29,7 +29,7 @@ jobs:
         pip install .[dev,plot]
 
     - name: Build the guide
-      run: cd guide && jupyter-book build -W --keep-going .
+      run: cd guide && jupyter-book build .
 
     # Push the book's HTML to gh-pages
     - name: GitHub Pages action
