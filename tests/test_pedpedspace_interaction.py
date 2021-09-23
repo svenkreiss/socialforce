@@ -2,6 +2,7 @@ import torch
 import socialforce
 
 
+# pylint: disable=invalid-name
 def test_r_aB():
     state = torch.tensor([
         [0.0, 0.0, 0.0, 0.0, 0.0, 1.0],

@@ -94,14 +94,14 @@ jobs:
     - name: Lint tests
       if: matrix.os != 'windows-latest'  # because of path separator
       run: |
-        pylint tests/*.py --disable=fixme
+        pylint tests/test_*.py --disable=fixme
     - name: pycodestyle socialforce
       run: |
         python -m pycodestyle socialforce
     - name: pycodestyle tests
       if: matrix.os != 'windows-latest'  # because of path separator
       run: |
-        python -m pycodestyle tests/*.py
+        python -m pycodestyle tests/test_*.py
     - name: Check notebook formats and tags
       if: matrix.slow
       run: |
