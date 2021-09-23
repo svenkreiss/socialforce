@@ -1,8 +1,3 @@
-```{note}
-This documents an unreleased version of the Python socialforce package.
-```
-
-
 # Introduction
 
 Install with
@@ -14,21 +9,24 @@ pip install socialforce
 
 # Abstract
 
-The Social Force model introduced by Helbing and Molnar in 1995
-is a cornerstone of pedestrian simulation. In this paper,
-I introduce a differentiable pedestrian simulation of the Social Force model
-where the assumptions on the shapes of interaction potentials are relaxed
-with the use of generic function approximators in the form of neural
-networks.
-Classical force-based pedestrian simulations suffer from unnatural
-locking behavior on head-on collision paths. In addition, they cannot
-model the bias
-of pedestrians to avoid each other on the right or left depending on
-the geographic region.
-My experiments with more general interaction potentials show that
-potentials with a sharp tip in the front avoid
-locking. In addition, asymmetric interaction potentials lead to a left or right
-bias when pedestrians avoid each other.
+> __Deep Social Force__<br />
+> _[Sven Kreiss](https://www.svenkreiss.com)_, 2021.
+>
+> The Social Force model introduced by Helbing and Molnar in 1995
+> is a cornerstone of pedestrian simulation. In this paper,
+> I introduce a differentiable pedestrian simulation of the Social Force model
+> where the assumptions on the shapes of interaction potentials are relaxed
+> with the use of generic function approximators in the form of neural
+> networks.
+> Classical force-based pedestrian simulations suffer from unnatural
+> locking behavior on head-on collision paths. In addition, they cannot
+> model the bias
+> of pedestrians to avoid each other on the right or left depending on
+> the geographic region.
+> My experiments with more general interaction potentials show that
+> potentials with a sharp tip in the front avoid
+> locking. In addition, asymmetric interaction potentials lead to a left or right
+> bias when pedestrians avoid each other.
 
 
 ## Acknowledgement
