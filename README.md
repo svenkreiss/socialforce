@@ -52,3 +52,12 @@ Opposing:
 
 <img src="docs/opposing.png" height=200 />
 <img src="docs/2opposing.png" height=200 />
+
+
+# TrajNet Data
+
+```
+wget -q https://github.com/vita-epfl/trajnetplusplusdata/releases/download/v4.0/train.zip
+mkdir data-trajnet
+unzip train.zip -d data-trajnet
+```

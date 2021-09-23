@@ -51,6 +51,12 @@ jobs:
     - run: ls -n /Applications/ | grep Xcode*
       if: matrix.os == 'macos-11'
     - uses: actions/checkout@v2
+    - name: Data setup
+      if: matrix.slow
+      run: |
+        wget -q https://github.com/vita-epfl/trajnetplusplusdata/releases/download/v4.0/train.zip
+        mkdir data-trajnet
+        unzip train.zip -d data-trajnet
     - name: Set up Python ${{ matrix.python }}
       if: ${{ !matrix.conda }}
       uses: actions/setup-python@v2

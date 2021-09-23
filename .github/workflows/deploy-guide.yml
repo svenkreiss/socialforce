@@ -21,6 +21,12 @@ jobs:
       with:
         python-version: 3.8
 
+    - name: Data setup
+      run: |
+        wget -q https://github.com/vita-epfl/trajnetplusplusdata/releases/download/v4.0/train.zip
+        mkdir data-trajnet
+        unzip train.zip -d data-trajnet
+
     - name: Install ffmpeg
       uses: FedericoCarboni/setup-ffmpeg@v1
       id: setup-ffmpeg
