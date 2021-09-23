@@ -42,5 +42,6 @@ jobs:
     - name: GitHub Pages action
       uses: peaceiris/actions-gh-pages@v3
       with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./guide/_build/html
         force_orphan: true  # https://github.com/peaceiris/actions-gh-pages/issues/455
