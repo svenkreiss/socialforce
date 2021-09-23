@@ -10,7 +10,7 @@ def test_r_aB():
     space = [
         torch.tensor([[0.0, 100.0], [0.0, 0.5]])
     ]
-    r_aB = socialforce.PedSpacePotential(space).r_aB(state)
+    r_aB = socialforce.potentials.PedSpacePotential(space).r_aB(state)
     assert r_aB.tolist() == [
         [[0.0, -0.5]],
         [[1.0, -0.5]],

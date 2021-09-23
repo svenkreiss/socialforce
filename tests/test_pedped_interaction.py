@@ -12,7 +12,7 @@ def test_rab():
         [0.0, 0.0],
         [1.0, 0.0],
     ])
-    V = socialforce.PedPedPotential(0.4)
+    V = socialforce.potentials.PedPedPotential(0.4)
     assert V.r_ab(r).tolist() == [[
         [0.0, 0.0],
         [-1.0, 0.0],
@@ -23,13 +23,13 @@ def test_rab():
 
 
 def test_f_ab():
-    initial_state = torch.tensor([
+    s = socialforce.Simulator()
+    initial_state = s.normalize_state([
         [0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
         [1.0, 0.0, 0.0, 0.0, 1.0, 1.0],
     ])
-    s = socialforce.Simulator(initial_state)
     force_at_unit_distance = 0.25  # confirmed below
-    assert s.f_ab().detach().numpy() == pytest.approx(np.array([[
+    assert s.f_ab(initial_state).detach().numpy() == pytest.approx(np.array([[
         [0.0, 0.0],
         [-force_at_unit_distance, 0.0],
     ], [
@@ -48,11 +48,11 @@ def test_b_zero_vel():
     ]])
     speeds = torch.tensor([0.0, 0.0])
     desired_directions = torch.tensor([[1.0, 0.0], [-1.0, 0.0]])
-    V = socialforce.PedPedPotential(0.4)
+    V = socialforce.potentials.PedPedPotential()
 
     # due to clipping for stability, a zero is clipped to 1e-8 which
     # is returned as 0.5 * sqrt(1e-8):
-    assert V.b(r_ab, speeds, desired_directions, delta_t=1.0).numpy() == pytest.approx(np.array([
+    assert V.b(r_ab, speeds, desired_directions).numpy() == pytest.approx(np.array([
         [0.00005, 1.0],
         [1.0, 0.00005],
     ]), abs=0.0001)

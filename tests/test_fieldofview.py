@@ -1,7 +1,7 @@
 """Test field-of-view computations."""
 
 import torch
-from socialforce.fieldofview import FieldOfView
+from socialforce import FieldOfView
 
 
 def test_w():
