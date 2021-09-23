@@ -56,20 +56,11 @@ Emergent lane forming behavior with 30 and 60 pedestrians:
 <img src="docs/walkway_60.gif" height=200 />
 
 
-# Ped-Ped Scenarios
+# Download TrajNet++ Data
 
-Crossing:
-
-<img src="docs/crossing.png" height=200 />
-<img src="docs/narrow_crossing.png" height=200 />
-
-Opposing:
-
-<img src="docs/opposing.png" height=200 />
-<img src="docs/2opposing.png" height=200 />
-
-
-# TrajNet Data
+The [Executable Book](https://www.svenkreiss.com/socialforce/)
+requires some real-world data for the TrajNet++ section.
+This is how to download and unzip it to the right folder:
 
 ```
 wget -q https://github.com/vita-epfl/trajnetplusplusdata/releases/download/v4.0/train.zip
