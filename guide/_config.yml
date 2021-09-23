@@ -19,6 +19,18 @@ sphinx:
     autodoc_member_order: bysource
     language: en
     latex_toplevel_sectioning: 'part'
+    html_theme_options:
+      extra_navbar: ""
+      extra_footer: |
+        <p>Powered by <a href="https://jupyterbook.org/">Jupyter Book</a>.</p>
+      home_page_in_toc: True
+      path_to_docs: guide
+      repository_branch: main
+      repository_url: https://github.com/svenkreiss/socialforce
+      toc_title: "On this page"
+      use_fullscreen_button: False
+      use_issues_button: True
+      use_repository_button: True
 
 parse:
   myst_enable_extensions:

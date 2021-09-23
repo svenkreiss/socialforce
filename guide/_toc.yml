@@ -1,15 +1,12 @@
-# Table of content
-# Learn more at https://jupyterbook.org/customize/toc.html
-#
-- file: intro
-
-- part: Simulation
+format: jb-book
+root: intro
+parts:
+- caption: Simulation
   chapters:
   - file: scenarios
   - file: integrators
   - file: performance
-
-- part: PedPed Potentials
+- caption: PedPed Potentials
   chapters:
   - file: pedped_1d
   - file: pedped_1p1d
@@ -18,12 +15,10 @@
   - file: pedped_diamond
   - file: pedped_1d_bayesian
   - file: trajnet
-
-- part: Demo
+- caption: Demo
   chapters:
   - file: corridor
-
-- part: References
+- caption: References
   chapters:
   - file: modules
   - file: bibliography
