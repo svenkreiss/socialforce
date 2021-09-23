@@ -27,7 +27,7 @@ setup(
             'jupyter-book',
             'matplotlib',
             'nbstripout',
-            'pylint',
+            'pylint~=2.10',
             'pytest',
         ],
         'plot': [

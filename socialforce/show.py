@@ -104,7 +104,7 @@ def state_animation(ax, all_states, *,
             if show_speed:
                 acc = np.linalg.norm(all_states[i, ped, 4:6])
                 text_actors[ped].set_text(
-                    '$v_{ped} = {:.2f}m/s, a_{ped} = {:.2f}m/s^2$'.format(speed, acc, ped=ped))
+                    f'$v_{ped} = {speed:.2f}m/s, a_{ped} = {acc:.2f}m/s^2$')
         return pedestrian_actors + text_actors
 
     ani = mpl_animation.FuncAnimation(
@@ -124,7 +124,7 @@ def states(ax, states, *, labels=None, monochrome=False, **kwargs):  # pylint: d
     for ped in range(states.shape[1]):
         x = states[:, ped, 0]
         y = states[:, ped, 1]
-        label = 'ped {}'.format(ped)
+        label = f'ped {ped}'
         if labels:
             label = labels[ped]
         tracks = ax.plot(x, y, '-o', label=label, markersize=2.5, markeredgewidth=0, **kwargs)
