@@ -138,5 +138,6 @@ jobs:
         pytest -vv -m "not slow"
     - name: Test guide
       if: matrix.slow
+      timeout-minutes: 45
       run: |
         cd guide && pytest --nbval-lax --current-env *.ipynb && cd ..

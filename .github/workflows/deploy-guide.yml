@@ -42,7 +42,11 @@ jobs:
       run: python -m pip install -e ".[dev,plot]" --no-build-isolation
 
     - name: Build the guide
+      timeout-minutes: 45
       run: cd guide && jupyter-book build .
+
+    - name: Debug
+      run: cat guide/_build/html/reports/*.log
 
     # Push the book's HTML to gh-pages
     - name: GitHub Pages action
