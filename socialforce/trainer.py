@@ -25,7 +25,7 @@ class Trainer:
             self.loss = torch.nn.L1Loss()
 
     @staticmethod
-    def scenes_to_experience(scenes, radius=3.0):
+    def scenes_to_experience(scenes, radius=3.0, acc_abs=0.1):
         experience = [
             (state1, state2)
             for scene in scenes
@@ -42,8 +42,15 @@ class Trainer:
                 | (PedPedPotential.norm_r_ab(PedPedPotential.r_ab(state2)) < radius)
             )
             torch.diagonal(small_distance)[:] = False
+            small_distance = torch.any(small_distance, dim=-1)
 
-            return valid_state1 & valid_state2 & torch.any(small_distance, dim=-1)
+            acc = (torch.abs(state1[:, 4:6]) > acc_abs) | (torch.abs(state2[:, 4:6]) > acc_abs)
+            acc = torch.any(acc, dim=-1)
+            # keep 10% of samples without acc:
+            acc[~acc] = (torch.rand(acc[~acc].shape) < 0.1)
+            acc[:] = torch.any(acc)  # symmetrize
+
+            return valid_state1 & valid_state2 & small_distance & acc
 
         keep_pedestrians = [keep(state1, state2) for state1, state2 in experience]
         experience = [

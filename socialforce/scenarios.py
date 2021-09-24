@@ -1,4 +1,5 @@
 import math
+
 import numpy as np
 import torch
 
@@ -25,7 +26,7 @@ class Circle:
             r = np.array([[c, -s], [s, c]])
             ped1 = np.concatenate((
                 np.matmul(r, ped0[0:2]),
-                np.matmul(r, ped0[2:4]) * (0.7 + 0.4 * torch.rand(1).item()),
+                np.matmul(r, ped0[2:4] * (0.7 + 0.4 * torch.rand(1).item())),
                 np.matmul(r, ped0[4:6]),
             ))
             generator_initial_states.append(
@@ -51,7 +52,7 @@ class ParallelOvertake:
         ped0 = [-5.0, 0.0, speed0, 0.0, 6.0, 0.0]  # or tau=, 0.5
 
         generator_initial_states = []
-        for b in 0.5 * torch.randn(n) + self.b_center:
+        for b in 0.75 * torch.randn(n) + self.b_center:
             # with 20% speed variation
             speed = 1.2 + 0.2 * torch.rand(1).item()
             ped1 = [-7.0, b, speed, 0.0, 7.0, b]  # or tau=, 0.1
@@ -79,7 +80,7 @@ class ParallelAvoidance:
         ped0 = [-5.0, 0.0, speed0, 0.0, 6.0, 0.0]  # or tau=, 0.5
 
         generator_initial_states = []
-        for b in 0.5 * torch.randn(n) + self.b_center:
+        for b in 0.75 * torch.randn(n) + self.b_center:
             # with 20% speed variation
             speed = 1.2 + 0.2 * torch.rand(1).item()
             ped1 = [7.0, b, -speed, 0.0, -7.0, b]  # or tau=, 0.1
