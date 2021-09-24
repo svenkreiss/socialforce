@@ -43,10 +43,7 @@ jobs:
 
     - name: Build the guide
       timeout-minutes: 45
-      run: cd guide && jupyter-book build .
-
-    - name: Debug
-      run: cat guide/_build/html/reports/*.log
+      run: cd guide && jupyter-book build -W --keep-going .
 
     # Push the book's HTML to gh-pages
     - name: GitHub Pages action
