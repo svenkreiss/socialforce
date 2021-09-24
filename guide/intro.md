@@ -13,8 +13,8 @@ pip install socialforce
 > _[Sven Kreiss](https://www.svenkreiss.com)_, 2021.
 >
 > The Social Force model introduced by Helbing and Molnar in 1995
-> is a cornerstone of pedestrian simulation. In this paper,
-> I introduce a differentiable pedestrian simulation of the Social Force model
+> is a cornerstone of pedestrian simulation. This paper
+> introduces a differentiable simulation of the Social Force model
 > where the assumptions on the shapes of interaction potentials are relaxed
 > with the use of universal function approximators in the form of neural
 > networks.
