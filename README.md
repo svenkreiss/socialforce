@@ -10,7 +10,7 @@
 > is a cornerstone of pedestrian simulation. In this paper,
 > I introduce a differentiable pedestrian simulation of the Social Force model
 > where the assumptions on the shapes of interaction potentials are relaxed
-> with the use of generic function approximators in the form of neural
+> with the use of universal function approximators in the form of neural
 > networks.
 > Classical force-based pedestrian simulations suffer from unnatural
 > locking behavior on head-on collision paths. In addition, they cannot
