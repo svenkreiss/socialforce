@@ -1,6 +1,9 @@
 # Introduction
 
-Install with
+[![Tests](https://github.com/svenkreiss/socialforce/actions/workflows/tests.yml/badge.svg)](https://github.com/svenkreiss/socialforce/actions/workflows/tests.yml)<br />
+[GitHub repository](https://github.com/svenkreiss/socialforce).
+
+Install with:
 
 ```
 pip install socialforce

@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/svenkreiss/socialforce.svg?branch=master)](https://travis-ci.org/svenkreiss/socialforce)
-[Executable Book](https://www.svenkreiss.com/socialforce/)
+[![Tests](https://github.com/svenkreiss/socialforce/actions/workflows/tests.yml/badge.svg)](https://github.com/svenkreiss/socialforce/actions/workflows/tests.yml)<br />
+[Executable Book documentation](https://www.svenkreiss.com/socialforce/).
 
 # Deep Social Force
 
@@ -27,21 +27,15 @@
 
 ```sh
 # install from PyPI
-pip install 'socialforce[test,plot]'
+pip install 'socialforce[dev,plot]'
 
 # or install from source
-pip install -e '.[test,plot]'
+pip install -e '.[dev,plot]'
 
 # run linting and tests
 pylint socialforce
+pycodestyle socialforce
 pytest tests/*.py
-
-# plots of simulations
-pytest -s tests/scenarios_*.py
-
-# run fits and create plots
-pytest -s tests/fit_pedped.py::test_opposing_mlp
-pytest -s tests/fit_pedped.py::test_circle_mlp
 ```
 
 
