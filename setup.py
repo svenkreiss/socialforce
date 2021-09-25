@@ -1,7 +1,7 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 # extract version from __init__.py
-with open('socialforce/__init__.py', 'r') as f:
+with open('socialforce/__init__.py', 'r', encoding='utf8') as f:
     VERSION_LINE = [l for l in f if l.startswith('__version__')][0]
     VERSION = VERSION_LINE.split('=')[1].strip()[1:-1]
 
@@ -9,25 +9,31 @@ with open('socialforce/__init__.py', 'r') as f:
 setup(
     name='socialforce',
     version=VERSION,
-    packages=[
-        'socialforce',
-    ],
-    license='AGPLv3',
-    description='Numpy implementation of the Social Force model.',
-    long_description=open('README.rst').read(),
+    packages=find_packages(),
+    license='MIT',
+    description='PyTorch implementation of DeepSocialForce.',
+    long_description=open('README.md', encoding='utf8').read(),
+    long_description_content_type='text/markdown',
     author='Sven Kreiss',
-    author_email='me@svenkreiss.com',
+    author_email='research@svenkreiss.com',
     url='https://github.com/svenkreiss/socialforce',
 
     install_requires=[
         'numpy',
+        'torch',
     ],
     extras_require={
-        'test': [
-            'pylint',
+        'dev': [
+            'jupyter-book',
+            'matplotlib',
+            'nbstripout',
+            'nbval',
+            'pycodestyle',
+            'pylint~=2.10',
             'pytest',
         ],
         'plot': [
+            'flameprof',
             'matplotlib',
         ],
     },

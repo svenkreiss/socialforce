@@ -1,16 +1,16 @@
 """Test field-of-view computations."""
 
-import numpy as np
-from socialforce.fieldofview import FieldOfView
+import torch
+from socialforce import FieldOfView
 
 
 def test_w():
     assert FieldOfView()(
-        np.array([
+        torch.tensor([
             [1.0, 0.0],
             [-1.0, 0.0],
         ]),
-        np.array([[
+        torch.tensor([[
             [0.0, 0.0],
             [1.0, 1.0],
         ], [
