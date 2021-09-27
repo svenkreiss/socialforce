@@ -1,9 +1,10 @@
 [![Tests](https://github.com/svenkreiss/socialforce/actions/workflows/tests.yml/badge.svg)](https://github.com/svenkreiss/socialforce/actions/workflows/tests.yml)<br />
-[Executable Book documentation](https://www.svenkreiss.com/socialforce/).
+[Executable Book documentation](https://www.svenkreiss.com/socialforce/).<br />
+[Deep Social Force (arXiv:2109.12081)](https://arxiv.org/abs/2109.12081).
 
 # Deep Social Force
 
-> __Deep Social Force__<br />
+> [__Deep Social Force__](https://arxiv.org/abs/2109.12081)<br />
 > _[Sven Kreiss](https://www.svenkreiss.com)_, 2021.
 >
 > The Social Force model introduced by Helbing and Molnar in 1995

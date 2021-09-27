@@ -1,7 +1,8 @@
 # Introduction
 
 [![Tests](https://github.com/svenkreiss/socialforce/actions/workflows/tests.yml/badge.svg)](https://github.com/svenkreiss/socialforce/actions/workflows/tests.yml)<br />
-[GitHub repository](https://github.com/svenkreiss/socialforce).
+[GitHub repository](https://github.com/svenkreiss/socialforce).<br />
+[Deep Social Force (arXiv:2109.12081)](https://arxiv.org/abs/2109.12081).
 
 Install with:
 
@@ -12,7 +13,7 @@ pip install socialforce
 
 # Abstract
 
-> __Deep Social Force__<br />
+> [__Deep Social Force__](https://arxiv.org/abs/2109.12081)<br />
 > _[Sven Kreiss](https://www.svenkreiss.com)_, 2021.
 >
 > The Social Force model introduced by Helbing and Molnar in 1995
