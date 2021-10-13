@@ -20,7 +20,6 @@ States = np.ndarray  # time-series data of State
 Space = List[np.ndarray]
 
 
-
 def random_agent_pos() -> Position:
     """Return initial agent position"""
     x_lower_lim = -10.0
@@ -105,7 +104,7 @@ def visualize(states: States, space: Space, output_filename: str) -> None:
 def setup(simulation_length: int) -> Tuple[States, Space]:
     """Set up space and states"""
     # agent_num = random.randrange(3, 8)
-    agent_num = 50
+    agent_num = 20
     initial_state = setup_state(agent_num)
     y_min = -2.0
     y_max = 2.0
@@ -137,21 +136,26 @@ def create_moving_agents(states: States) -> np.ndarray:
 
 
 def create_json(metadata: dict) -> None:
+    """Create json formatted metadata file"""
     file_path = "/tmp/datasets/SocialForceModel/metadata.json"
     with open(file_path, 'w') as f:
         json.dump(metadata, f)
 
 
 def create_tfrecord(position_list: np.ndarray, particle_type: np.ndarray) -> None:
+    """Create tfrecord formatted feature data file"""
     file_path = "/tmp/datasets/SocialForceModel/train.tfrecord"
     with tf.Session():
         with tf.python_io.TFRecordWriter(file_path) as w:
             context = tf.train.Features(feature={
                 'key': tf.train.Feature(int64_list=tf.train.Int64List(value=[0])),
-                'particle_type': tf.train.Feature(bytes_list=tf.train.BytesList(value=[tf.io.serialize_tensor(particle_type).eval()]))
+                'particle_type': tf.train.Feature(
+                    bytes_list=tf.train.BytesList(
+                        value=[tf.io.serialize_tensor(particle_type).eval()]))
             })
             description_feature = [tf.train.Feature(
-                bytes_list=tf.train.BytesList(value=[tf.io.serialize_tensor(v).eval()])) for v in position_list
+                bytes_list=tf.train.BytesList(
+                    value=[tf.io.serialize_tensor(v).eval()])) for v in position_list
             ]
             feature_lists = tf.train.FeatureLists(feature_list={
                 "position": tf.train.FeatureList(feature=description_feature)
@@ -165,68 +169,70 @@ def create_tfrecord(position_list: np.ndarray, particle_type: np.ndarray) -> Non
 def main():
     """Output multiple simulation results and each animations"""
     output_num = 10
-    base_file_name = 'output'
     simulation_length = 150
-    vel_mean_list: np.array
     timestep_num_list = np.array([])
     agents_num_list = np.array([])
+    vel_mean_list = np.empty((0,2))
+    vel_var_list = np.empty((0,2))
+    acc_mean_list = np.empty((0,2))
+    acc_var_list = np.empty((0,2))
     for i in range(output_num):
-        print(f"creating images({i + 1}/{output_num})")
+        print(f"Dealing with ({i + 1}/{output_num}) simulation")
         states, space = setup(simulation_length)
         timestep_num_list = np.append(timestep_num_list, states.shape[0])
         agents_num_list = np.append(agents_num_list, states.shape[1])
-        if 'vel_mean_list' not in locals():
-            vel_mean_list = np.array([np.mean(states[:, :, 2:4], axis=(0, 1))])
-            vel_var_list = np.array(
-                [np.mean((states[:, :, 2:4] - vel_mean_list[i]) ** 2, axis=(0, 1))])
-            first_step_vel_mean = np.mean(states[0, :, 2:4], axis=0)
-            final_step_vel_mean = np.mean(states[-1, :, 2:4], axis=0)
-            try:
-                # acc_mean = (\bar{v_(L+1)} - \bar{v_1}) / L
-                acc_mean_list = np.array(
-                    [(final_step_vel_mean - first_step_vel_mean) / (timestep_num_list[i] - 1)])
-            except ZeroDivisionError as e:
-                print(e)
-                print("Simulation timestep should be more than 1.")
-            acc_var_list = np.array([np.mean(
-                (np.diff(states[:, :, 2:4], axis=0) - acc_mean_list[i]) ** 2, axis=(0, 1))])
-        else:
-            vel_mean_list = np.append(vel_mean_list, np.array(
-                [np.mean(states[:, :, 2:4], axis=(0, 1))]), axis=0)
-            vel_var_list = np.append(vel_var_list, np.array(
-                [np.mean((states[:, :, 2:4] - vel_mean_list[i]) ** 2, axis=(0, 1))]), axis=0)
-            first_step_vel_mean = np.mean(states[0, :, 2:4], axis=0)
-            final_step_vel_mean = np.mean(states[-1, :, 2:4], axis=0)
-            try:
-                # acc_mean = (\bar{v_(L+1)} - \bar{v_1}) / L
-                acc_mean_list = np.append(acc_mean_list, np.array(
-                    [(final_step_vel_mean - first_step_vel_mean) / (timestep_num_list[i] - 1)]), axis=0)
-            except ZeroDivisionError as e:
-                print(e)
-                print("Simulation timestep should be more than 1.")
-            acc_var_list = np.append(acc_var_list, np.array([np.mean(
-                (np.diff(states[:, :, 2:4], axis=0) - acc_mean_list[i]) ** 2, axis=(0, 1))]), axis=0)
+        vel_mean_list = np.append(
+            vel_mean_list,
+            np.array([np.mean(states[:, :, 2:4], axis=(0, 1))]),
+            axis=0
+        )
+        vel_var_list = np.append(
+            vel_var_list,
+            np.array([np.mean(
+                (states[:, :, 2:4] - vel_mean_list[i]) ** 2,
+                axis=(0, 1))]),
+            axis=0
+        )
+        first_step_vel_mean = np.mean(states[0, :, 2:4], axis=0)
+        final_step_vel_mean = np.mean(states[-1, :, 2:4], axis=0)
+        try:
+            # acc_mean = (\bar{v_(L+1)} - \bar{v_1}) / L
+            acc_mean_list = np.append(acc_mean_list, np.array(
+                [(final_step_vel_mean - first_step_vel_mean) / (timestep_num_list[i] - 1)]), axis=0)
+        except ZeroDivisionError as e:
+            print(e)
+            print("Simulation timestep should be more than 1.")
+        acc_var_list = np.append(
+            acc_var_list,
+            np.array([np.mean(
+                (np.diff(states[:, :, 2:4], axis=0) - acc_mean_list[i]) ** 2,
+                axis=(0, 1))]),
+            axis=0
+        )
         obstacle_agents = create_obstacle_agents(space, simulation_length)
-        moving_agent = create_moving_agents(states)
+        moving_agents = create_moving_agents(states)
+        agents = np.concatenate([obstacle_agents, moving_agents], axis=1)
         obstacle_row = [3] * obstacle_agents.shape[1]
-        moving_row = [6] * moving_agent.shape[1]
+        moving_row = [6] * moving_agents.shape[1]
         agents_row = obstacle_row + moving_row
-        create_tfrecord(np.concatenate([obstacle_agents, moving_agent], axis=1), np.array(agents_row))
-        # visualize(states, space, f'mycode/img/{base_file_name + str(i)}.gif')
-    vel_mean = np.sum(vel_mean_list * timestep_num_list.reshape((-1, 1)) * agents_num_list.reshape((-1, 1)),
-                      axis=0) / np.sum(timestep_num_list * agents_num_list)
-    acc_mean = np.sum(acc_mean_list * (timestep_num_list.reshape((-1, 1)) - 1) * agents_num_list.reshape((-1, 1)),
-                      axis=0) / np.sum((timestep_num_list - 1) * agents_num_list)
-    vel_var = np.sum((vel_var_list + vel_mean_list ** 2) * timestep_num_list.reshape((-1, 1)) *
-                     agents_num_list.reshape((-1, 1)), axis=0) / np.sum(timestep_num_list * agents_num_list)
-    acc_var = np.sum((acc_var_list + acc_mean_list ** 2) * (timestep_num_list.reshape((-1, 1)) - 1)
-                     * agents_num_list.reshape((-1, 1)), axis=0) / np.sum((timestep_num_list - 1) * agents_num_list)
+        print(agents)
+        create_tfrecord(agents, np.array(agents_row))
+        print(agents)
+        # visualize(states, space, f'mycode/img/output{str(i + 1)}.gif')
+    vel_mean = np.sum(
+        vel_mean_list * timestep_num_list.reshape((-1, 1)) * agents_num_list.reshape((-1, 1)),
+        axis=0) / np.sum(timestep_num_list * agents_num_list)
+    acc_mean = np.sum(
+        acc_mean_list * (timestep_num_list.reshape((-1, 1)) - 1) * agents_num_list.reshape((-1, 1)),
+        axis=0) / np.sum((timestep_num_list - 1) * agents_num_list)
+    vel_var = np.sum(
+        (vel_var_list + vel_mean_list ** 2) * timestep_num_list.reshape((-1, 1)) *
+        agents_num_list.reshape((-1, 1)), axis=0) / np.sum(timestep_num_list * agents_num_list)
+    acc_var = np.sum(
+        (acc_var_list + acc_mean_list ** 2) * (timestep_num_list.reshape((-1, 1)) - 1) *
+        agents_num_list.reshape((-1, 1)), axis=0) / np.sum((timestep_num_list - 1) * agents_num_list)
     vel_std = np.sqrt(vel_var)
     acc_std = np.sqrt(acc_var)
-    print(vel_mean)
-    print(acc_mean)
-    print(vel_std)
-    print(acc_std)
     metadata: dict = {
         'bounds': [[-15.0, 15.0], [-10.0, 10.0]],
         'sequence_length': simulation_length,
@@ -238,6 +244,7 @@ def main():
         'acc_mean': acc_mean.tolist(),
         'acc_std': acc_std.tolist()
     }
+    print(metadata)
     create_json(metadata)
 
 
