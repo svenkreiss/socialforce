@@ -148,14 +148,11 @@ def create_tfrecord(position_list: np.ndarray, particle_type: np.ndarray) -> Non
     with tf.Session():
         with tf.python_io.TFRecordWriter(file_path) as w:
             context = tf.train.Features(feature={
-                'key': tf.train.Feature(int64_list=tf.train.Int64List(value=[0])),
-                'particle_type': tf.train.Feature(
-                    bytes_list=tf.train.BytesList(
-                        value=[tf.io.serialize_tensor(particle_type).eval()]))
+                'key': _int64_feature(0),
+                'particle_type': _bytes_feature(tf.io.serialize_tensor(particle_type).eval())
             })
-            description_feature = [tf.train.Feature(
-                bytes_list=tf.train.BytesList(
-                    value=[tf.io.serialize_tensor(v).eval()])) for v in position_list
+            description_feature = [
+                _bytes_feature(tf.io.serialize_tensor(v).eval()) for v in position_list
             ]
             feature_lists = tf.train.FeatureLists(feature_list={
                 "position": tf.train.FeatureList(feature=description_feature)
@@ -217,7 +214,6 @@ def main():
         agents_row = obstacle_row + moving_row
         print(agents)
         create_tfrecord(agents, np.array(agents_row))
-        print(agents)
         # visualize(states, space, f'mycode/img/output{str(i + 1)}.gif')
     vel_mean = np.sum(
         vel_mean_list * timestep_num_list.reshape((-1, 1)) * agents_num_list.reshape((-1, 1)),
