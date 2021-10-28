@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import socialforce
 
+tf.enable_eager_execution()
+
 Position = Tuple[float, float]
 State = np.ndarray
 States = np.ndarray  # time-series data of State
@@ -76,6 +78,8 @@ def visualize(states: States, space: Space, output_filename: str) -> None:
         ax = context['ax']
         ax.set_xlabel('x [m]')
         ax.set_ylabel('y [m]')
+        ax.set_xlim(-20, 15)
+        ax.set_ylim(-10, 10)
 
         for s in space:
             ax.plot(s[:, 0], s[:, 1], 'o', color='black', markersize=2.5)
@@ -116,7 +120,7 @@ def setup(simulation_length: int) -> Tuple[States, Space]:
     hole = (hole_start, hole_end)
     x_pos = random.uniform(-3.0, 3.0)
     space = []
-    space = add_hole(space, hole, x_pos)
+    # space = add_hole(space, hole, x_pos)
     s = socialforce.Simulator(
         initial_state, socialforce.PedSpacePotential(space))
     states = np.stack([s.step().state.copy()
@@ -145,28 +149,27 @@ def create_json(metadata: dict) -> None:
 def create_tfrecord(position_list: np.ndarray, particle_type: np.ndarray) -> None:
     """Create tfrecord formatted feature data file"""
     file_path = "/tmp/datasets/SocialForceModel/train.tfrecord"
-    with tf.Session():
-        with tf.python_io.TFRecordWriter(file_path) as w:
-            context = tf.train.Features(feature={
-                'key': _int64_feature(0),
-                'particle_type': _bytes_feature(tf.io.serialize_tensor(particle_type).eval())
-            })
-            description_feature = [
-                _bytes_feature(tf.io.serialize_tensor(v).eval()) for v in position_list
-            ]
-            feature_lists = tf.train.FeatureLists(feature_list={
-                "position": tf.train.FeatureList(feature=description_feature)
-            })
+    with tf.python_io.TFRecordWriter(file_path) as w:
+        context = tf.train.Features(feature={
+            'particle_type': _bytes_feature(particle_type.tobytes()),
+            'key': _int64_feature(np.int64(0))
+        })
+        description_feature = [
+            _bytes_feature(v.tobytes()) for v in position_list
+        ]
+        feature_lists = tf.train.FeatureLists(feature_list={
+            "position": tf.train.FeatureList(feature=description_feature)
+        })
 
-            sequence_example = tf.train.SequenceExample(context=context,
-                                                        feature_lists=feature_lists)
-            w.write(sequence_example.SerializeToString())
+        sequence_example = tf.train.SequenceExample(context=context,
+                                                    feature_lists=feature_lists)
+        w.write(sequence_example.SerializeToString())
 
 
 def main():
     """Output multiple simulation results and each animations"""
-    output_num = 10
-    simulation_length = 150
+    output_num = 1000
+    simulation_length = 100
     timestep_num_list = np.array([])
     agents_num_list = np.array([])
     vel_mean_list = np.empty((0,2))
@@ -209,10 +212,12 @@ def main():
         obstacle_agents = create_obstacle_agents(space, simulation_length)
         moving_agents = create_moving_agents(states)
         agents = np.concatenate([obstacle_agents, moving_agents], axis=1)
-        obstacle_row = [3] * obstacle_agents.shape[1]
-        moving_row = [6] * moving_agents.shape[1]
+        print(obstacle_agents.shape[1])
+        print(moving_agents.shape[1])
+        obstacle_row = [np.int64(3)] * obstacle_agents.shape[1]
+        moving_row = [np.int64(8)] * moving_agents.shape[1]
         agents_row = obstacle_row + moving_row
-        print(agents)
+        print(agents.shape)
         create_tfrecord(agents, np.array(agents_row))
         # visualize(states, space, f'mycode/img/output{str(i + 1)}.gif')
     vel_mean = np.sum(
@@ -231,7 +236,7 @@ def main():
     acc_std = np.sqrt(acc_var)
     metadata: dict = {
         'bounds': [[-15.0, 15.0], [-10.0, 10.0]],
-        'sequence_length': simulation_length,
+        'sequence_length': simulation_length - 1,
         'default_connectivity_radius': 0.2,
         'dim': 2,
         'dt': 0.4,
