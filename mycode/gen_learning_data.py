@@ -148,6 +148,7 @@ def create_json(metadata: dict) -> None:
 
 def create_tfrecord(position_list: np.ndarray, particle_type: np.ndarray) -> None:
     """Create tfrecord formatted feature data file"""
+    # file name is train.tfrecord/test.tfrecord/valid.tfrecord
     file_path = "/tmp/datasets/SocialForceModel/train.tfrecord"
     with tf.python_io.TFRecordWriter(file_path) as w:
         context = tf.train.Features(feature={
