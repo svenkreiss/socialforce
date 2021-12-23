@@ -3,6 +3,7 @@ Simulate crowd flow by Social Force Model
 Provide training data for GNS
 """
 
+import math
 from os import times
 import random
 import json
@@ -22,7 +23,7 @@ States = np.ndarray  # time-series data of State
 Space = List[np.ndarray]
 
 
-def random_agent_pos() -> Position:
+def create_random_agent_pos() -> Position:
     """Return initial agent position"""
     x_lower_lim = -10.0
     x_upper_lim = -5.0
@@ -33,9 +34,28 @@ def random_agent_pos() -> Position:
     return rand_x, rand_y
 
 
-def setup_state(agent_num: int) -> State:
+def get_xy_from_rd(radius: float, degree: float) -> Position:
+    """Return XY coordinates from polar coodinates"""
+    rad = math.radians(degree)
+    x = radius * math.cos(rad)
+    y = radius * math.sin(rad)
+    return x, y
+
+
+def create_circular_random_agent_pos() -> Position:
+    """Return initial agent position in a circle"""
+    lower_radius = 5.0
+    upper_radius = 8.0
+    lower_angle = 0.0
+    upper_angle = 360.0
+    rand_radius = random.uniform(lower_radius, upper_radius)
+    rand_angle = random.uniform(lower_angle, upper_angle)
+    return get_xy_from_rd(rand_radius, rand_angle)
+
+
+def setup_state(agent_num: int, destination: Tuple[float, float]) -> State:
     """Return initial agent state"""
-    return np.array([(*random_agent_pos(), 1.0, 0.0, 10.0, 0.0) for _ in range(agent_num)])
+    return np.array([(*create_circular_random_agent_pos(), 1.0, 0.0, *destination) for _ in range(agent_num)])
 
 
 def add_space(space: Space, obstacle: Tuple[Position, Position]) -> Space:
@@ -105,11 +125,11 @@ def visualize(states: States, space: Space, output_filename: str) -> None:
         context['update_function'] = update
 
 
-def setup(simulation_length: int) -> Tuple[States, Space]:
+def setup(simulation_length: int, destination: Tuple[float, float]) -> Tuple[States, Space]:
     """Set up space and states"""
     # agent_num = random.randrange(3, 8)
     agent_num = 20
-    initial_state = setup_state(agent_num)
+    initial_state = setup_state(agent_num, destination)
     y_min = -2.0
     y_max = 2.0
     hole_width_min = 1.4
@@ -141,18 +161,20 @@ def create_moving_agents(states: States) -> np.ndarray:
 
 def create_json(metadata: dict) -> None:
     """Create json formatted metadata file"""
-    file_path = "/tmp/datasets/SocialForceModel/metadata.json"
+    file_path = "/tmp/datasets/SFM/metadata.json"
     with open(file_path, 'w') as f:
         json.dump(metadata, f)
 
 
-def create_tfrecord(position_list: np.ndarray, particle_type: np.ndarray) -> None:
+def create_tfrecord(position_list: np.ndarray, particle_type: np.ndarray, destination_x: np.ndarray, destination_y: np.ndarray) -> None:
     """Create tfrecord formatted feature data file"""
     # file name is train.tfrecord/test.tfrecord/valid.tfrecord
-    file_path = "/tmp/datasets/SocialForceModel/train.tfrecord"
+    file_path = "/tmp/datasets/SFM/train.tfrecord"
     with tf.python_io.TFRecordWriter(file_path) as w:
         context = tf.train.Features(feature={
             'particle_type': _bytes_feature(particle_type.tobytes()),
+            'destination_x': _bytes_feature(destination_x.tobytes()),
+            'destination_y': _bytes_feature(destination_y.tobytes()),
             'key': _int64_feature(np.int64(0))
         })
         description_feature = [
@@ -171,6 +193,7 @@ def main():
     """Output multiple simulation results and each animations"""
     output_num = 1000
     simulation_length = 100
+    destination = (0, 0)
     timestep_num_list = np.array([])
     agents_num_list = np.array([])
     vel_mean_list = np.empty((0,2))
@@ -179,7 +202,7 @@ def main():
     acc_var_list = np.empty((0,2))
     for i in range(output_num):
         print(f"Dealing with ({i + 1}/{output_num}) simulation")
-        states, space = setup(simulation_length)
+        states, space = setup(simulation_length, destination)
         timestep_num_list = np.append(timestep_num_list, states.shape[0])
         agents_num_list = np.append(agents_num_list, states.shape[1])
         vel_mean_list = np.append(
@@ -219,7 +242,9 @@ def main():
         moving_row = [np.int64(8)] * moving_agents.shape[1]
         agents_row = obstacle_row + moving_row
         print(agents.shape)
-        create_tfrecord(agents, np.array(agents_row))
+        destination_x = [np.float32(destination[0])] * agents.shape[1]
+        destination_y = [np.float32(destination[1])] * agents.shape[1]
+        create_tfrecord(agents, np.array(agents_row), np.array(destination_x), np.array(destination_y))
         # visualize(states, space, f'mycode/img/output{str(i + 1)}.gif')
     vel_mean = np.sum(
         vel_mean_list * timestep_num_list.reshape((-1, 1)) * agents_num_list.reshape((-1, 1)),
