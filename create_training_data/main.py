@@ -44,8 +44,8 @@ def get_xy_from_rd(radius: float, degree: float) -> Position:
 
 def create_circular_random_agent_pos() -> Position:
     """Return initial agent position in a circle"""
-    lower_radius = 5.0
-    upper_radius = 8.0
+    lower_radius = 50.0
+    upper_radius = 80.0
     lower_angle = 0.0
     upper_angle = 360.0
     rand_radius = random.uniform(lower_radius, upper_radius)
@@ -98,8 +98,8 @@ def visualize(states: States, space: Space, output_filename: str) -> None:
         ax = context['ax']
         ax.set_xlabel('x [m]')
         ax.set_ylabel('y [m]')
-        ax.set_xlim(-20, 15)
-        ax.set_ylim(-10, 10)
+        ax.set_xlim(-200, 150)
+        ax.set_ylim(-100, 100)
 
         for s in space:
             ax.plot(s[:, 0], s[:, 1], 'o', color='black', markersize=2.5)
@@ -128,17 +128,17 @@ def visualize(states: States, space: Space, output_filename: str) -> None:
 def setup(simulation_length: int, destination: Tuple[float, float]) -> Tuple[States, Space]:
     """Set up space and states"""
     # agent_num = random.randrange(3, 8)
-    agent_num = 20
+    agent_num = 230
     initial_state = setup_state(agent_num, destination)
-    y_min = -2.0
-    y_max = 2.0
-    hole_width_min = 1.4
-    hole_width_max = 2.0
-    hole_width = random.uniform(hole_width_min, hole_width_max)
-    hole_start = random.uniform(y_min, y_max - hole_width)
-    hole_end = hole_start + hole_width
-    hole = (hole_start, hole_end)
-    x_pos = random.uniform(-3.0, 3.0)
+    # y_min = -2.0
+    # y_max = 2.0
+    # hole_width_min = 1.4
+    # hole_width_max = 2.0
+    # hole_width = random.uniform(hole_width_min, hole_width_max)
+    # hole_start = random.uniform(y_min, y_max - hole_width)
+    # hole_end = hole_start + hole_width
+    # hole = (hole_start, hole_end)
+    # x_pos = random.uniform(-3.0, 3.0)
     space = []
     # space = add_hole(space, hole, x_pos)
     s = socialforce.Simulator(
@@ -191,7 +191,7 @@ def create_tfrecord(position_list: np.ndarray, particle_type: np.ndarray, destin
 
 def main():
     """Output multiple simulation results and each animations"""
-    output_num = 1000
+    output_num = 1
     simulation_length = 100
     destination = (0, 0)
     timestep_num_list = np.array([])
@@ -245,7 +245,7 @@ def main():
         destination_x = [np.float32(destination[0])] * agents.shape[1]
         destination_y = [np.float32(destination[1])] * agents.shape[1]
         create_tfrecord(agents, np.array(agents_row), np.array(destination_x), np.array(destination_y))
-        # visualize(states, space, f'mycode/img/output{str(i + 1)}.gif')
+        visualize(states, space, f'create_training_data/img/output{str(i + 1)}.gif')
     vel_mean = np.sum(
         vel_mean_list * timestep_num_list.reshape((-1, 1)) * agents_num_list.reshape((-1, 1)),
         axis=0) / np.sum(timestep_num_list * agents_num_list)
@@ -261,7 +261,7 @@ def main():
     vel_std = np.sqrt(vel_var)
     acc_std = np.sqrt(acc_var)
     metadata: dict = {
-        'bounds': [[-15.0, 15.0], [-10.0, 10.0]],
+        'bounds': [[-150.0, 150.0], [-100.0, 100.0]],
         'sequence_length': simulation_length - 1,
         'default_connectivity_radius': 0.2,
         'dim': 2,
