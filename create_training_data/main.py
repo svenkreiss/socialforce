@@ -23,6 +23,21 @@ States = np.ndarray  # time-series data of State
 Space = List[np.ndarray]
 
 
+# class Simulation():
+#     """
+#     Contain all information of Social Force Model simulation
+#     This consist of
+#     - State
+#     - Space
+#     """
+
+#     class State():
+#         """Pedestrians information represented by (x, y, v_x, v_y, d_x, d_y, [tau])"""
+
+#     class Space():
+#         """Obstacles information """
+
+
 def create_random_agent_pos() -> Position:
     """Return initial agent position"""
     x_lower_lim = -10.0
@@ -44,8 +59,8 @@ def get_xy_from_rd(radius: float, degree: float) -> Position:
 
 def create_circular_random_agent_pos() -> Position:
     """Return initial agent position in a circle"""
-    lower_radius = 50.0
-    upper_radius = 80.0
+    lower_radius = 5.0
+    upper_radius = 8.0
     lower_angle = 0.0
     upper_angle = 360.0
     rand_radius = random.uniform(lower_radius, upper_radius)
@@ -98,8 +113,8 @@ def visualize(states: States, space: Space, output_filename: str) -> None:
         ax = context['ax']
         ax.set_xlabel('x [m]')
         ax.set_ylabel('y [m]')
-        ax.set_xlim(-200, 150)
-        ax.set_ylim(-100, 100)
+        ax.set_xlim(-20, 15)
+        ax.set_ylim(-10, 10)
 
         for s in space:
             ax.plot(s[:, 0], s[:, 1], 'o', color='black', markersize=2.5)
@@ -128,7 +143,7 @@ def visualize(states: States, space: Space, output_filename: str) -> None:
 def setup(simulation_length: int, destination: Tuple[float, float]) -> Tuple[States, Space]:
     """Set up space and states"""
     # agent_num = random.randrange(3, 8)
-    agent_num = 230
+    agent_num = 20
     initial_state = setup_state(agent_num, destination)
     # y_min = -2.0
     # y_max = 2.0
@@ -161,7 +176,7 @@ def create_moving_agents(states: States) -> np.ndarray:
 
 def create_json(metadata: dict) -> None:
     """Create json formatted metadata file"""
-    file_path = "/tmp/datasets/SFM/metadata.json"
+    file_path = "../deepmind-research/learning_to_simulate/datasets/SFM/metadata.json"
     with open(file_path, 'w') as f:
         json.dump(metadata, f)
 
@@ -169,7 +184,7 @@ def create_json(metadata: dict) -> None:
 def create_tfrecord(position_list: np.ndarray, particle_type: np.ndarray, destination_x: np.ndarray, destination_y: np.ndarray) -> None:
     """Create tfrecord formatted feature data file"""
     # file name is train.tfrecord/test.tfrecord/valid.tfrecord
-    file_path = "/tmp/datasets/SFM/train.tfrecord"
+    file_path = "../deepmind-research/learning_to_simulate/datasets/SFM/train.tfrecord"
     with tf.python_io.TFRecordWriter(file_path) as w:
         context = tf.train.Features(feature={
             'particle_type': _bytes_feature(particle_type.tobytes()),
@@ -191,7 +206,7 @@ def create_tfrecord(position_list: np.ndarray, particle_type: np.ndarray, destin
 
 def main():
     """Output multiple simulation results and each animations"""
-    output_num = 1
+    output_num = 1000
     simulation_length = 100
     destination = (0, 0)
     timestep_num_list = np.array([])
@@ -245,7 +260,7 @@ def main():
         destination_x = [np.float32(destination[0])] * agents.shape[1]
         destination_y = [np.float32(destination[1])] * agents.shape[1]
         create_tfrecord(agents, np.array(agents_row), np.array(destination_x), np.array(destination_y))
-        visualize(states, space, f'create_training_data/img/output{str(i + 1)}.gif')
+        # visualize(states, space, f'create_training_data/img/output{str(i + 1)}.gif')
     vel_mean = np.sum(
         vel_mean_list * timestep_num_list.reshape((-1, 1)) * agents_num_list.reshape((-1, 1)),
         axis=0) / np.sum(timestep_num_list * agents_num_list)
