@@ -23,19 +23,22 @@ States = np.ndarray  # time-series data of State
 Space = List[np.ndarray]
 
 
-# class Simulation():
-#     """
-#     Contain all information of Social Force Model simulation
-#     This consist of
-#     - State
-#     - Space
-#     """
+class Simulation():
+    """
+    Contain all information of Social Force Model simulation
+    This consist of
+    - State
+    - Space
+    """
+    def __init__(self, simulation_length: int, destination: Position):
+        self.simulation_length = simulation_length
+        self.destination = destination
 
-#     class State():
-#         """Pedestrians information represented by (x, y, v_x, v_y, d_x, d_y, [tau])"""
+    class State():
+        """Pedestrians information represented by (x, y, v_x, v_y, d_x, d_y, [tau])"""
 
-#     class Space():
-#         """Obstacles information """
+    class Space():
+        """Obstacles information """
 
 
 def create_random_agent_pos() -> Position:
@@ -209,6 +212,7 @@ def main():
     output_num = 1000
     simulation_length = 100
     destination = (0, 0)
+    sim = Simulation(simulation_length, destination)
     timestep_num_list = np.array([])
     agents_num_list = np.array([])
     vel_mean_list = np.empty((0,2))
