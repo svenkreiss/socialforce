@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Create default data",
+            "type": "python",
+            "request": "launch",
+            "module": "socialforce.create_data",
+            "justMyCode": true,
+        },
+        {
+            "name": "Create 2000 train data",
+            "type": "python",
+            "request": "launch",
+            "module": "socialforce.create_data",
+            "justMyCode": true,
+            "args": [
+                "--n_train_data=2000"
+            ]
+        }
+    ]
+}

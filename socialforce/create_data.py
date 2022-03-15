@@ -15,6 +15,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 import socialforce
 
+from absl import app
+from absl import flags
+
+FLAGS = flags.FLAGS
+
+flags.DEFINE_integer('n_train_data', 1000, 'The number of train data', lower_bound=1)
+flags.DEFINE_integer('n_valid_data', 100, 'The number of valid data', lower_bound=1)
+flags.DEFINE_integer('n_test_data', 100, 'The number of test data', lower_bound=1)
+flags.DEFINE_integer('simulation_length', 100, 'The length of each simulation', lower_bound=1)
+flags.DEFINE_integer('n_agents_mean', 20, 'The mean of the number of agents', lower_bound=1)
+flags.DEFINE_integer('n_agents_std', 1, 'The standard deviation of the number of agents', lower_bound=0)
+
+flags.DEFINE_string('base_output_path', './output/', 'The base path for output data')
+
 tf.enable_eager_execution()
 
 Position = Tuple[float, float]
@@ -146,7 +160,7 @@ def visualize(states: States, space: Space, output_filename: str) -> None:
 def setup(simulation_length: int, destination: Tuple[float, float]) -> Tuple[States, Space]:
     """Set up space and states"""
     # agent_num = random.randrange(3, 8)
-    agent_num = 20
+    agent_num = FLAGS.n_agents_mean
     initial_state = setup_state(agent_num, destination)
     # y_min = -2.0
     # y_max = 2.0
@@ -179,7 +193,8 @@ def create_moving_agents(states: States) -> np.ndarray:
 
 def create_json(metadata: dict) -> None:
     """Create json formatted metadata file"""
-    file_path = "../deepmind-research/learning_to_simulate/datasets/SFM/metadata.json"
+    # file_path = "../deepmind-research/learning_to_simulate/datasets/SFM/metadata.json"
+    file_path = FLAGS.base_output_path + 'metadata.json'
     with open(file_path, 'w') as f:
         json.dump(metadata, f)
 
@@ -187,7 +202,8 @@ def create_json(metadata: dict) -> None:
 def create_tfrecord(position_list: np.ndarray, particle_type: np.ndarray, destination_x: np.ndarray, destination_y: np.ndarray) -> None:
     """Create tfrecord formatted feature data file"""
     # file name is train.tfrecord/test.tfrecord/valid.tfrecord
-    file_path = "../deepmind-research/learning_to_simulate/datasets/SFM/train.tfrecord"
+    # file_path = "../deepmind-research/learning_to_simulate/datasets/SFM/train.tfrecord"
+    file_path = FLAGS.base_output_path + 'train.tfrecord'
     with tf.python_io.TFRecordWriter(file_path) as w:
         context = tf.train.Features(feature={
             'particle_type': _bytes_feature(particle_type.tobytes()),
@@ -207,10 +223,9 @@ def create_tfrecord(position_list: np.ndarray, particle_type: np.ndarray, destin
         w.write(sequence_example.SerializeToString())
 
 
-def main():
+def main(_):
     """Output multiple simulation results and each animations"""
-    output_num = 1000
-    simulation_length = 100
+    simulation_length = FLAGS.simulation_length
     destination = (0, 0)
     sim = Simulation(simulation_length, destination)
     timestep_num_list = np.array([])
@@ -219,10 +234,11 @@ def main():
     vel_var_list = np.empty((0,2))
     acc_mean_list = np.empty((0,2))
     acc_var_list = np.empty((0,2))
-    file_path = "../deepmind-research/learning_to_simulate/datasets/SFM/train.tfrecord"
+    # file_path = "../deepmind-research/learning_to_simulate/datasets/SFM/train.tfrecord"
+    file_path = FLAGS.base_output_path + 'train.tfrecord'
     with tf.python_io.TFRecordWriter(file_path) as w:
-        for i in range(output_num):
-            print(f"Dealing with ({i + 1}/{output_num}) simulation")
+        for i in range(FLAGS.n_train_data):
+            print(f"Dealing with ({i + 1}/{FLAGS.n_train_data}) simulation")
             states, space = setup(simulation_length, destination)
             timestep_num_list = np.append(timestep_num_list, states.shape[0])
             agents_num_list = np.append(agents_num_list, states.shape[1])
@@ -314,4 +330,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    app.run(main)

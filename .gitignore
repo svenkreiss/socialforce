@@ -6,8 +6,8 @@ __pycache__/
 dist/
 .ipynb_checkpoints/
 
-# editors
-.vscode/
+# output
+output/
 
 # OS
 .DS_Store
