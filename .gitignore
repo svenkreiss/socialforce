@@ -11,7 +11,3 @@ output/
 
 # OS
 .DS_Store
-
-# image
-docs/
-create_training_data/img/

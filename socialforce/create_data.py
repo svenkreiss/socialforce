@@ -4,30 +4,36 @@ Provide training data for GNS
 """
 
 import math
-from os import times
 import random
 import json
 from typing import List, Tuple
-from numpy.core.defchararray import array
 import tensorflow as tf
 
 import matplotlib.pyplot as plt
 import numpy as np
-import socialforce
 
 from absl import app
 from absl import flags
 
+import socialforce
+
 FLAGS = flags.FLAGS
 
-flags.DEFINE_integer('n_train_data', 1000, 'The number of train data', lower_bound=1)
-flags.DEFINE_integer('n_valid_data', 100, 'The number of valid data', lower_bound=1)
-flags.DEFINE_integer('n_test_data', 100, 'The number of test data', lower_bound=1)
-flags.DEFINE_integer('simulation_length', 100, 'The length of each simulation', lower_bound=1)
-flags.DEFINE_integer('n_agents_mean', 20, 'The mean of the number of agents', lower_bound=1)
-flags.DEFINE_integer('n_agents_std', 1, 'The standard deviation of the number of agents', lower_bound=0)
+flags.DEFINE_integer('n_train_data', 1000,
+                     'The number of train data', lower_bound=1)
+flags.DEFINE_integer('n_valid_data', 100,
+                     'The number of valid data', lower_bound=1)
+flags.DEFINE_integer('n_test_data', 100,
+                     'The number of test data', lower_bound=1)
+flags.DEFINE_integer('simulation_length', 100,
+                     'The length of each simulation', lower_bound=1)
+flags.DEFINE_integer('n_agents_mean', 20,
+                     'The mean of the number of agents', lower_bound=1)
+flags.DEFINE_integer(
+    'n_agents_std', 1, 'The standard deviation of the number of agents', lower_bound=0)
 
-flags.DEFINE_string('base_output_path', './output/', 'The base path for output data')
+flags.DEFINE_string('base_output_path', './output/',
+                    'The base path for output data')
 
 tf.enable_eager_execution()
 
@@ -44,6 +50,7 @@ class Simulation():
     - State
     - Space
     """
+
     def __init__(self, simulation_length: int, destination: Position):
         self.simulation_length = simulation_length
         self.destination = destination
@@ -230,10 +237,10 @@ def main(_):
     sim = Simulation(simulation_length, destination)
     timestep_num_list = np.array([])
     agents_num_list = np.array([])
-    vel_mean_list = np.empty((0,2))
-    vel_var_list = np.empty((0,2))
-    acc_mean_list = np.empty((0,2))
-    acc_var_list = np.empty((0,2))
+    vel_mean_list = np.empty((0, 2))
+    vel_var_list = np.empty((0, 2))
+    acc_mean_list = np.empty((0, 2))
+    acc_var_list = np.empty((0, 2))
     # file_path = "../deepmind-research/learning_to_simulate/datasets/SFM/train.tfrecord"
     file_path = FLAGS.base_output_path + 'train.tfrecord'
     with tf.python_io.TFRecordWriter(file_path) as w:
@@ -266,7 +273,8 @@ def main(_):
             acc_var_list = np.append(
                 acc_var_list,
                 np.array([np.mean(
-                    (np.diff(states[:, :, 2:4], axis=0) - acc_mean_list[i]) ** 2,
+                    (np.diff(states[:, :, 2:4], axis=0) -
+                     acc_mean_list[i]) ** 2,
                     axis=(0, 1))]),
                 axis=0
             )
@@ -301,10 +309,12 @@ def main(_):
             # create_tfrecord(agents, np.array(agents_row), np.array(destination_x), np.array(destination_y))
             # visualize(states, space, f'create_training_data/img/output{str(i + 1)}.gif')
     vel_mean = np.sum(
-        vel_mean_list * timestep_num_list.reshape((-1, 1)) * agents_num_list.reshape((-1, 1)),
+        vel_mean_list *
+        timestep_num_list.reshape((-1, 1)) * agents_num_list.reshape((-1, 1)),
         axis=0) / np.sum(timestep_num_list * agents_num_list)
     acc_mean = np.sum(
-        acc_mean_list * (timestep_num_list.reshape((-1, 1)) - 1) * agents_num_list.reshape((-1, 1)),
+        acc_mean_list * (timestep_num_list.reshape((-1, 1)) -
+                         1) * agents_num_list.reshape((-1, 1)),
         axis=0) / np.sum((timestep_num_list - 1) * agents_num_list)
     vel_var = np.sum(
         (vel_var_list + vel_mean_list ** 2) * timestep_num_list.reshape((-1, 1)) *
