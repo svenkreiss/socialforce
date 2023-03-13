@@ -23,7 +23,7 @@ class Reader:
     """
     def __init__(self, input_file, scene_type=None):
         if scene_type is not None and scene_type not in {'rows', 'paths', 'tags'}:
-            raise Exception('scene_type not supported')
+            raise ValueError('scene_type not supported')
         self.scene_type = scene_type
 
         self.tracks_by_frame = defaultdict(list)
@@ -102,7 +102,7 @@ class Reader:
     def scene(self, scene_id):
         scene = self.scenes_by_id.get(scene_id)
         if scene is None:
-            raise Exception('scene with that id not found')
+            raise ValueError('scene with that id not found')
 
         frames = range(scene.start, scene.end + 1)
         track_rows = [r

@@ -175,7 +175,7 @@ class PedPedPotentialMLP2D(PedPedPotential2D):
         lin_out = torch.nn.Linear(hidden_units, 1)
 
         # activation_function = torch.nn.Softplus
-        activation_function = lambda: torch.nn.Softplus(beta=5)
+        activation_function = lambda: torch.nn.Softplus(beta=5)  # pylint: disable=unnecessary-lambda-assignment
         self.mlp = torch.nn.Sequential(
             lin_in, activation_function(),
             *[layer for lin in lin_hidden for layer in (lin, activation_function())],
