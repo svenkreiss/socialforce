@@ -26,6 +26,7 @@ setup(
         'dev': [
             'jupyter-book',
             'matplotlib',
+            'nbconvert',
             'nbstripout',
             'nbval',
             'pycodestyle',
