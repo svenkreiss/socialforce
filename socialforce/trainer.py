@@ -47,7 +47,7 @@ class Trainer:
             acc = (torch.abs(state1[:, 4:6]) > acc_abs) | (torch.abs(state2[:, 4:6]) > acc_abs)
             acc = torch.any(acc, dim=-1)
             # keep 10% of samples without acc:
-            acc[~acc] = (torch.rand(acc[~acc].shape) < 0.1)
+            acc[~acc] = torch.rand(acc[~acc].shape) < 0.1
             acc[:] = torch.any(acc)  # symmetrize
 
             return valid_state1 & valid_state2 & small_distance & acc

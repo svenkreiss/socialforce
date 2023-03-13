@@ -109,7 +109,12 @@ class PedPedPotential(torch.nn.Module):
         zero vector gives nan gradients.
         """
         out = torch.linalg.norm(r_ab, ord=2, dim=2, keepdim=False)
-        torch.diagonal(out)[:] = 0.0
+
+        # only take the upper and lower triangles and leaving the
+        # diagonal at zero and do it in a differentiable way
+        # without inplace ops
+        out = torch.triu(out, diagonal=1) + torch.tril(out, diagonal=-1)
+
         return out
 
 

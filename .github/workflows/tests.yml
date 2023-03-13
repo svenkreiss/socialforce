@@ -10,10 +10,6 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python: 3.6
-            torch: 1.9.0+cpu
-            torch-source: https://download.pytorch.org/whl/torch_stable.html
-          - os: ubuntu-latest
             python: 3.7
             torch: 1.9.0+cpu
             torch-source: https://download.pytorch.org/whl/torch_stable.html
@@ -25,6 +21,10 @@ jobs:
           - os: ubuntu-latest
             python: 3.9
             torch: 1.9.0+cpu
+            torch-source: https://download.pytorch.org/whl/torch_stable.html
+          - os: ubuntu-latest
+            python: "3.10"
+            torch: 1.13.1+cpu
             torch-source: https://download.pytorch.org/whl/torch_stable.html
           - os: macos-11
             python: 3.7
@@ -50,7 +50,7 @@ jobs:
     steps:
     - run: ls -n /Applications/ | grep Xcode*
       if: matrix.os == 'macos-11'
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Data setup
       if: matrix.slow
       run: |
@@ -59,7 +59,7 @@ jobs:
         unzip train.zip -d data-trajnet
     - name: Set up Python ${{ matrix.python }}
       if: ${{ !matrix.conda }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python }}
     - name: Set up Conda
