@@ -10,10 +10,6 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python: 3.6
-            torch: 1.9.0+cpu
-            torch-source: https://download.pytorch.org/whl/torch_stable.html
-          - os: ubuntu-latest
             python: 3.7
             torch: 1.9.0+cpu
             torch-source: https://download.pytorch.org/whl/torch_stable.html
@@ -25,6 +21,10 @@ jobs:
           - os: ubuntu-latest
             python: 3.9
             torch: 1.9.0+cpu
+            torch-source: https://download.pytorch.org/whl/torch_stable.html
+          - os: ubuntu-latest
+            python: 3.10
+            torch: 1.13.1+cpu
             torch-source: https://download.pytorch.org/whl/torch_stable.html
           - os: macos-11
             python: 3.7
