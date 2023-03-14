@@ -1,6 +1,6 @@
 """PyTorch implementation of the Social Force model."""
 
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 
 from .field_of_view import FieldOfView
 from .trainer import Trainer

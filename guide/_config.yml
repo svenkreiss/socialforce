@@ -20,7 +20,6 @@ sphinx:
     language: en
     latex_toplevel_sectioning: 'part'
     html_theme_options:
-      extra_navbar: ""
       extra_footer: |
         <p>Powered by <a href="https://jupyterbook.org/">Jupyter Book</a>.</p>
       home_page_in_toc: True
@@ -64,5 +63,3 @@ html:
   use_repository_button: true
   favicon: favicon.png
   extra_navbar: ""
-  extra_footer: |
-    <div>Powered by <a href="https://jupyterbook.org/">Jupyter Book</a>.</div>
