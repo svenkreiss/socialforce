@@ -1,0 +1,832 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Diamond &#8212; DeepSocialForce</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'pedped_diamond';</script>
+    <link rel="shortcut icon" href="_static/favicon.png"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="TrajNet++" href="trajnet.html" />
+    <link rel="prev" title="1D Wall" href="pedped_1d_wall.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Simulation</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="scenarios.html">Scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integrators.html">Integrators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">PedPed Potentials</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pedped_1d.html">1D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pedped_1p1d.html">1+1D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pedped_2d.html">2D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pedped_1d_wall.html">1D Wall</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Diamond</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajnet.html">TrajNet++</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Demo</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="corridor.html">Corridor</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bibliography.html">Bibliography</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/svenkreiss/socialforce" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/svenkreiss/socialforce/issues/new?title=Issue%20on%20page%20%2Fpedped_diamond.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/pedped_diamond.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Diamond</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> On this page </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parametric">Parametric</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scenarios">Scenarios</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mlp-inference">MLP Inference</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fourier-features">Fourier Features</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#asymmetric">Asymmetric</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="diamond">
+<h1>Diamond<a class="headerlink" href="#diamond" title="Permalink to this heading">#</a></h1>
+<section id="parametric">
+<h2>Parametric<a class="headerlink" href="#parametric" title="Permalink to this heading">#</a></h2>
+<p>This is an extension of the <a class="reference internal" href="pedped_2d.html#pedped-2d"><span class="std std-ref">2D</span></a> example to study the robustness
+of the inference process to potentials with gradients that change orientation.
+We use a modified <span class="math notranslate nohighlight">\(V(b)\)</span> potential that could be described as a “diamond”
+of height <span class="math notranslate nohighlight">\(V_0\)</span> and with a half-width of <span class="math notranslate nohighlight">\(\sigma\)</span>:</p>
+<div class="amsmath math notranslate nohighlight" id="equation-856c8f49-76b9-4be8-8e71-5c43be60c421">
+<span class="eqno">(12)<a class="headerlink" href="#equation-856c8f49-76b9-4be8-8e71-5c43be60c421" title="Permalink to this equation">#</a></span>\[\begin{align}
+    V(b) &amp;= V_0 \max\left(0, 1 - \frac{|x_1| + |x_2|}{2\sigma} \right)
+\end{align}\]</div>
+<p>with its two parameters <span class="math notranslate nohighlight">\(V_0\)</span> and <span class="math notranslate nohighlight">\(\sigma\)</span>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">socialforce</span><span class="o">.</span><span class="n">FieldOfView</span><span class="o">.</span><span class="n">out_of_view_factor</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+<span class="n">V</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">potentials</span><span class="o">.</span><span class="n">PedPedPotentialDiamond</span><span class="p">(</span><span class="n">sigma</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">canvas</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">):</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">potential_2d</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">ax1</span><span class="p">)</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">potential_2d_grad</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">ax2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/9b39145a0219f8e679555a0eec8baf07927b541a79d798ee18184247be3c57ae.png" src="_images/9b39145a0219f8e679555a0eec8baf07927b541a79d798ee18184247be3c57ae.png" />
+</div>
+</div>
+</section>
+<section id="scenarios">
+<h2>Scenarios<a class="headerlink" href="#scenarios" title="Permalink to this heading">#</a></h2>
+<p>Now we use the above parametric potential in a simulation to generate synthetic
+scenarios according to this potential.
+We generate <a class="reference internal" href="scenarios.html#scenarios"><span class="std std-ref">Circle and ParallelOvertake scenarios</span></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">circle</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">Circle</span><span class="p">(</span><span class="n">ped_ped</span><span class="o">=</span><span class="n">V</span><span class="p">)</span>
+<span class="n">parallel_overtake</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">ParallelOvertake</span><span class="p">(</span><span class="n">ped_ped</span><span class="o">=</span><span class="n">V</span><span class="p">)</span>
+<span class="n">parallel_avoidance</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">ParallelAvoidance</span><span class="p">(</span><span class="n">ped_ped</span><span class="o">=</span><span class="n">V</span><span class="p">)</span>
+<span class="n">scenarios</span> <span class="o">=</span> <span class="n">circle</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span> <span class="o">+</span> <span class="n">parallel_overtake</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span> <span class="o">+</span> <span class="n">parallel_avoidance</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">150</span><span class="p">)</span>
+<span class="n">true_experience</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">Trainer</span><span class="o">.</span><span class="n">scenes_to_experience</span><span class="p">(</span><span class="n">scenarios</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>All the scenes from a fixed observer:</p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># HIDE CODE</span>
+<span class="k">with</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">track_canvas</span><span class="p">()</span> <span class="k">as</span> <span class="n">ax</span><span class="p">:</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">states</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">scenarios</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">scene</span> <span class="ow">in</span> <span class="n">scenarios</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">states</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<img alt="_images/2cf8584969fa5ffa4f5e810676f8bcc137099dc2842284c465687d4569094879.png" src="_images/2cf8584969fa5ffa4f5e810676f8bcc137099dc2842284c465687d4569094879.png" />
+</div>
+</div>
+<p>Parallel Overtake and Avoidance scenes from the perspective of the primary pedestrian:</p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># HIDE CODE</span>
+<span class="k">with</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">track_canvas</span><span class="p">()</span> <span class="k">as</span> <span class="n">ax</span><span class="p">:</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">experience</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">true_experience</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<img alt="_images/6a23a104afac3a31e8867f1405fea1c7f1e134af5ba93cad69f531761387dfd4.png" src="_images/6a23a104afac3a31e8867f1405fea1c7f1e134af5ba93cad69f531761387dfd4.png" />
+</div>
+</div>
+<p>From the perspective of the other pedestrian:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># HIDE CELL</span>
+<span class="k">with</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">track_canvas</span><span class="p">()</span> <span class="k">as</span> <span class="n">ax</span><span class="p">:</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">experience</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">true_experience</span><span class="p">,</span> <span class="n">reference_ped</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/83a300fd2188fa901f83afc7c1fd72faf30431e2ca72385296e915c613e15930.png" src="_images/83a300fd2188fa901f83afc7c1fd72faf30431e2ca72385296e915c613e15930.png" />
+</div>
+</div>
+</section>
+<section id="mlp-inference">
+<h2>MLP Inference<a class="headerlink" href="#mlp-inference" title="Permalink to this heading">#</a></h2>
+<p>We construct an coordinate-based MLP with Fourier
+Features <span id="id1">[<a class="reference internal" href="bibliography.html#id4" title="Ali Rahimi, Benjamin Recht, and others. Random features for large-scale kernel machines. In NIPS, volume 3, 5. Citeseer, 2007.">RR+07</a>, <a class="reference internal" href="bibliography.html#id3" title="Matthew Tancik, Pratul P Srinivasan, Ben Mildenhall, Sara Fridovich-Keil, Nithin Raghavan, Utkarsh Singhal, Ravi Ramamoorthi, Jonathan T Barron, and Ren Ng. Fourier features let networks learn high frequency functions in low dimensional domains. arXiv preprint arXiv:2006.10739, 2020.">TSM+20</a>]</span>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">V</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">potentials</span><span class="o">.</span><span class="n">PedPedPotentialMLP2D</span><span class="p">(</span><span class="n">hidden_units</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">n_hidden_layers</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">canvas</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">):</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">potential_2d</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">ax1</span><span class="p">)</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">potential_2d_grad</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">ax2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/8c6529b6867358091565c402aa8f02c7e7c3120c816ed446dc84ea4e88b1e376.png" src="_images/8c6529b6867358091565c402aa8f02c7e7c3120c816ed446dc84ea4e88b1e376.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">simulator</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">Simulator</span><span class="p">(</span><span class="n">ped_ped</span><span class="o">=</span><span class="n">V</span><span class="p">)</span>
+<span class="n">opt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">nesterov</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># socialforce.Trainer(simulator, opt).loop(10, true_experience)  # does not work</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">canvas</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">):</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">potential_2d</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">ax1</span><span class="p">)</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">potential_2d_grad</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">ax2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/8c6529b6867358091565c402aa8f02c7e7c3120c816ed446dc84ea4e88b1e376.png" src="_images/8c6529b6867358091565c402aa8f02c7e7c3120c816ed446dc84ea4e88b1e376.png" />
+</div>
+</div>
+</section>
+<section id="fourier-features">
+<h2>Fourier Features<a class="headerlink" href="#fourier-features" title="Permalink to this heading">#</a></h2>
+<p>We construct an coordinate-based MLP with Fourier
+Features <span id="id2">[<a class="reference internal" href="bibliography.html#id4" title="Ali Rahimi, Benjamin Recht, and others. Random features for large-scale kernel machines. In NIPS, volume 3, 5. Citeseer, 2007.">RR+07</a>, <a class="reference internal" href="bibliography.html#id3" title="Matthew Tancik, Pratul P Srinivasan, Ben Mildenhall, Sara Fridovich-Keil, Nithin Raghavan, Utkarsh Singhal, Ravi Ramamoorthi, Jonathan T Barron, and Ren Ng. Fourier features let networks learn high frequency functions in low dimensional domains. arXiv preprint arXiv:2006.10739, 2020.">TSM+20</a>]</span>.
+This coordinate-based MLP with the Fourier Feature operator FF is:</p>
+<div class="amsmath math notranslate nohighlight" id="equation-88490261-7aba-4826-a720-7d3642ae11f4">
+<span class="eqno">(13)<a class="headerlink" href="#equation-88490261-7aba-4826-a720-7d3642ae11f4" title="Permalink to this equation">#</a></span>\[\begin{align}
+    \textrm{MLP}(b, d_{\perp}, d_{\parallel}) &amp;= \textrm{Softplus} \;\; L_{1\times64} \;\; \big[ \textrm{Softplus} \;\; L_{64\times64} \big]^3 \;\;  \textrm{Softplus} \;\; L_{64\times192} \;\; \textrm{FF}_{192 \times 3} \;\; (b, d_{\perp}, d_{\parallel})
+\end{align}\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">V</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">potentials</span><span class="o">.</span><span class="n">PedPedPotentialMLP2D</span><span class="p">(</span>
+    <span class="n">hidden_units</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">n_hidden_layers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_fourier_features</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">tanh_range</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">fourier_scale</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">canvas</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">):</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">potential_2d</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">ax1</span><span class="p">)</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">potential_2d_grad</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">ax2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/3233e716405023e79963979944bafb961cef5f2c5b327ca23f67eaafb2d0670f.png" src="_images/3233e716405023e79963979944bafb961cef5f2c5b327ca23f67eaafb2d0670f.png" />
+</div>
+</div>
+<div class="cell tag_hide-output docutils container">
+<div class="cell_input above-output-prompt docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># HIDE OUTPUT</span>
+<span class="n">simulator</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">Simulator</span><span class="p">(</span><span class="n">ped_ped</span><span class="o">=</span><span class="n">V</span><span class="p">)</span>
+<span class="n">opt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">nesterov</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">socialforce</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span><span class="n">simulator</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span><span class="o">.</span><span class="n">loop</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">true_experience</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<details class="hide below-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell output</span>
+<span class="expanded">Hide code cell output</span>
+</summary>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 1: 0.014954329964087408
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 2: 0.008502832169185334
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 3: 0.007874428449982311
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 4: 0.007327022015030727
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 5: 0.006928104666907649
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 6: 0.006514695905028739
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 7: 0.006121755282512264
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 8: 0.006174470931536292
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 9: 0.00611644272413037
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 10: 0.005691224154699206
+</pre></div>
+</div>
+</div>
+</details>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">canvas</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">):</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">potential_2d</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">ax1</span><span class="p">)</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">potential_2d_grad</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">ax2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/77d9fe2480047a6ce37d110988532cca2b84067bc92a948bfc078c4f462c3e26.png" src="_images/77d9fe2480047a6ce37d110988532cca2b84067bc92a948bfc078c4f462c3e26.png" />
+</div>
+</div>
+</section>
+<section id="asymmetric">
+<h2>Asymmetric<a class="headerlink" href="#asymmetric" title="Permalink to this heading">#</a></h2>
+<p>We can redo the above steps with an asymmetric version of the diamond potential.
+This refines the previous model by a short training on the scenarios
+generated with the modified potential.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">V_asym</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">potentials</span><span class="o">.</span><span class="n">PedPedPotentialDiamond</span><span class="p">(</span><span class="n">sigma</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">asymmetry_angle</span><span class="o">=-</span><span class="mf">20.0</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">canvas</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">):</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">potential_2d</span><span class="p">(</span><span class="n">V_asym</span><span class="p">,</span> <span class="n">ax1</span><span class="p">)</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">potential_2d_grad</span><span class="p">(</span><span class="n">V_asym</span><span class="p">,</span> <span class="n">ax2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/6ad905f8a79db4e59542f89d3b42dc9064e0f645e8d5555255d577b7c8e00019.png" src="_images/6ad905f8a79db4e59542f89d3b42dc9064e0f645e8d5555255d577b7c8e00019.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">circle_asym</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">Circle</span><span class="p">(</span><span class="n">ped_ped</span><span class="o">=</span><span class="n">V_asym</span><span class="p">)</span>
+<span class="n">parallel_overtake_asym</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">ParallelOvertake</span><span class="p">(</span><span class="n">ped_ped</span><span class="o">=</span><span class="n">V_asym</span><span class="p">,</span> <span class="n">b_center</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="n">parallel_avoidance_asym</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">ParallelAvoidance</span><span class="p">(</span><span class="n">ped_ped</span><span class="o">=</span><span class="n">V_asym</span><span class="p">,</span> <span class="n">b_center</span><span class="o">=-</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="n">scenarios_asym</span> <span class="o">=</span> <span class="n">circle_asym</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span> <span class="o">+</span> <span class="n">parallel_overtake_asym</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span> <span class="o">+</span> <span class="n">parallel_avoidance_asym</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">150</span><span class="p">)</span>
+<span class="n">true_experience_asym</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">Trainer</span><span class="o">.</span><span class="n">scenes_to_experience</span><span class="p">(</span><span class="n">scenarios_asym</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>From the perspective of the primary pedestrian:</p>
+<div class="cell tag_hide-input docutils container">
+<details class="hide above-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell source</span>
+<span class="expanded">Hide code cell source</span>
+</summary>
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># HIDE CODE</span>
+<span class="k">with</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">track_canvas</span><span class="p">()</span> <span class="k">as</span> <span class="n">ax</span><span class="p">:</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">experience</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">true_experience_asym</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</details>
+<div class="cell_output docutils container">
+<img alt="_images/f7c46cdad0f8aa425d33bdedae76eca4304bbe042f599cacbf70030621df7ba2.png" src="_images/f7c46cdad0f8aa425d33bdedae76eca4304bbe042f599cacbf70030621df7ba2.png" />
+</div>
+</div>
+<div class="cell tag_hide-output docutils container">
+<div class="cell_input above-output-prompt docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># HIDE OUTPUT</span>
+<span class="n">socialforce</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span><span class="n">simulator</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span><span class="o">.</span><span class="n">loop</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">true_experience_asym</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<details class="hide below-input">
+<summary aria-label="Toggle hidden content">
+<span class="collapsed">Show code cell output</span>
+<span class="expanded">Hide code cell output</span>
+</summary>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 1: 0.00941122369561918
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 2: 0.0068207247207434886
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 3: 0.006154838573552499
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 4: 0.005948143439985735
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 5: 0.00587793174974868
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 6: 0.005617758106690029
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 7: 0.005600845601446969
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 8: 0.005363577492465092
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 9: 0.005134366818606357
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 10: 0.005052264335268388
+</pre></div>
+</div>
+</div>
+</details>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">canvas</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">as</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">):</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">potential_2d</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">ax1</span><span class="p">)</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">show</span><span class="o">.</span><span class="n">potential_2d_grad</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">ax2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/9c00679894642314eb5f802526e678cd2cdd216a737541b6c2726c1dac33f1ab.png" src="_images/9c00679894642314eb5f802526e678cd2cdd216a737541b6c2726c1dac33f1ab.png" />
+</div>
+</div>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="pedped_1d_wall.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">1D Wall</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="trajnet.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">TrajNet++</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parametric">Parametric</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scenarios">Scenarios</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mlp-inference">MLP Inference</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fourier-features">Fourier Features</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#asymmetric">Asymmetric</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            <div class="bd-footer-content__inner">
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By <a href="https://www.svenkreiss.com">Sven Kreiss</a> and <a href="https://github.com/svenkreiss/socialforce/graphs/contributors">contributors</a>.
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2020-2021.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+<div class="extra_footer">
+  <p>Powered by <a href="https://jupyterbook.org/">Jupyter Book</a>.</p>
+
+</div>
+  </div>
+  
+</div></div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

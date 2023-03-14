@@ -1,0 +1,706 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Performance &#8212; DeepSocialForce</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=12da95d707ffb74b382d" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d" />
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'performance';</script>
+    <link rel="shortcut icon" href="_static/favicon.png"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="1D" href="pedped_1d.html" />
+    <link rel="prev" title="Integrators" href="integrators.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Simulation</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="scenarios.html">Scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integrators.html">Integrators</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Performance</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">PedPed Potentials</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pedped_1d.html">1D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pedped_1p1d.html">1+1D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pedped_2d.html">2D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pedped_1d_wall.html">1D Wall</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pedped_diamond.html">Diamond</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajnet.html">TrajNet++</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Demo</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="corridor.html">Corridor</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bibliography.html">Bibliography</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/svenkreiss/socialforce" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/svenkreiss/socialforce/issues/new?title=Issue%20on%20page%20%2Fperformance.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/performance.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Performance</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> On this page </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-for-one-scenario">Inference for one Scenario</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="performance">
+<h1>Performance<a class="headerlink" href="#performance" title="Permalink to this heading">#</a></h1>
+<section id="inference-for-one-scenario">
+<h2>Inference for one Scenario<a class="headerlink" href="#inference-for-one-scenario" title="Permalink to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scenario</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">scenarios</span><span class="o">.</span><span class="n">Circle</span><span class="p">()</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">true_experience</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">Trainer</span><span class="o">.</span><span class="n">scenes_to_experience</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span>
+<span class="n">V</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">potentials</span><span class="o">.</span><span class="n">PedPedPotentialMLP</span><span class="p">()</span>
+
+<span class="n">simulator</span> <span class="o">=</span> <span class="n">socialforce</span><span class="o">.</span><span class="n">Simulator</span><span class="p">(</span><span class="n">ped_ped</span><span class="o">=</span><span class="n">V</span><span class="p">)</span>
+<span class="n">opt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">V</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">cProfile</span><span class="o">.</span><span class="n">Profile</span><span class="p">()</span> <span class="k">as</span> <span class="n">pr</span><span class="p">:</span>
+    <span class="n">socialforce</span><span class="o">.</span><span class="n">Trainer</span><span class="p">(</span><span class="n">simulator</span><span class="p">,</span> <span class="n">opt</span><span class="p">)</span><span class="o">.</span><span class="n">loop</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">true_experience</span><span class="p">,</span> <span class="n">log_interval</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INFO:socialforce.trainer:from 1 scenes, extracted 21 experiences, filtered to 10
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>epoch 10: 0.01452542123151943
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span> <span class="o">=</span> <span class="n">pstats</span><span class="o">.</span><span class="n">Stats</span><span class="p">(</span><span class="n">pr</span><span class="p">)</span><span class="o">.</span><span class="n">strip_dirs</span><span class="p">()</span><span class="o">.</span><span class="n">sort_stats</span><span class="p">(</span><span class="s1">&#39;tottime&#39;</span><span class="p">)</span>
+<span class="n">ps</span><span class="o">.</span><span class="n">dump_stats</span><span class="p">(</span><span class="s1">&#39;simulator.prof&#39;</span><span class="p">)</span>
+<span class="n">ps</span><span class="o">.</span><span class="n">print_stats</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>         198052 function calls (192052 primitive calls) in 2.184 seconds
+
+   Ordered by: internal time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     1100    1.043    0.001    1.043    0.001 {method &#39;run_backward&#39; of &#39;torch._C._EngineBase&#39; objects}
+     2000    0.136    0.000    0.177    0.000 stateutils.py:6(desired_directions)
+     1000    0.100    0.000    0.107    0.000 simulator.py:187(__call__)
+     7000    0.091    0.000    0.091    0.000 {built-in method torch._C._linalg.linalg_norm}
+     1000    0.067    0.000    1.333    0.001 simulator.py:120(_step)
+       10    0.055    0.006    2.180    0.218 trainer.py:66(epoch)
+     1000    0.054    0.000    0.141    0.000 pedped_1d.py:21(b)
+     1000    0.049    0.000    0.125    0.000 field_of_view.py:18(__call__)
+     2000    0.049    0.000    0.070    0.000 pedped_1d.py:48(r_ab)
+     1000    0.043    0.000    0.068    0.000 simulator.py:99(cap_velocity)
+     1000    0.038    0.000    0.038    0.000 {built-in method einsum}
+     2000    0.030    0.000    0.030    0.000 {built-in method torch._C._nn.linear}
+    10000    0.022    0.000    0.022    0.000 {method &#39;unsqueeze&#39; of &#39;torch._C._TensorBase&#39; objects}
+    14100    0.022    0.000    0.022    0.000 {method &#39;detach&#39; of &#39;torch._C._TensorBase&#39; objects}
+     3000    0.021    0.000    0.021    0.000 {built-in method clamp}
+     1000    0.017    0.000    0.779    0.001 simulator.py:89(f_ab)
+     2000    0.016    0.000    0.016    0.000 {built-in method triu}
+     2000    0.015    0.000    0.015    0.000 {method &#39;view&#39; of &#39;torch._C._TensorBase&#39; objects}
+     1000    0.015    0.000    0.620    0.001 functional.py:194(vjp)
+     2000    0.015    0.000    0.069    0.000 pedped_1d.py:102(norm_r_ab)
+     2000    0.015    0.000    0.015    0.000 {built-in method torch._C._nn.softplus}
+     2000    0.012    0.000    0.012    0.000 {built-in method tril}
+ 5200/200    0.012    0.000    1.353    0.007 module.py:1045(_call_impl)
+     3000    0.012    0.000    0.012    0.000 {built-in method diagonal}
+     2000    0.010    0.000    0.010    0.000 {built-in method isnan}
+     1000    0.010    0.000    0.010    0.000 {built-in method sum}
+2000/1000    0.009    0.000    0.050    0.000 functional.py:186(einsum)
+     1000    0.009    0.000    0.639    0.001 pedped_1d.py:89(grad_r_ab_)
+     1000    0.009    0.000    0.013    0.000 _tensor.py:546(__rdiv__)
+     1000    0.008    0.000    0.113    0.000 pedped_1d.py:166(value_b)
+     1000    0.008    0.000    0.760    0.001 pedped_1d.py:82(grad_r_ab)
+      100    0.008    0.000    1.343    0.013 simulator.py:110(forward)
+     1000    0.007    0.000    0.007    0.000 {built-in method ones}
+     6000    0.007    0.000    0.007    0.000 module.py:1117(__getattr__)
+     2000    0.007    0.000    0.042    0.000 linear.py:95(forward)
+     1000    0.007    0.000    0.007    0.000 {built-in method sqrt}
+     1000    0.006    0.000    0.076    0.000 container.py:137(forward)
+     1100    0.006    0.000    0.006    0.000 {method &#39;clone&#39; of &#39;torch._C._TensorBase&#39; objects}
+     1000    0.006    0.000    0.006    0.000 {built-in method full_like}
+     1000    0.005    0.000    0.016    0.000 stateutils.py:20(speeds)
+      100    0.005    0.000    0.005    0.000 {built-in method torch._C._nn.l1_loss}
+     5200    0.005    0.000    0.005    0.000 {built-in method torch._C._get_tracing_state}
+     3000    0.005    0.000    0.006    0.000 functional.py:7(_as_tuple)
+     2000    0.005    0.000    0.011    0.000 functional.py:43(_grad_preprocess)
+     1000    0.005    0.000    0.312    0.000 functional.py:127(_autograd_grad)
+     1000    0.005    0.000    0.307    0.000 __init__.py:152(grad)
+     1000    0.004    0.000    0.004    0.000 {built-in method clone}
+     1000    0.004    0.000    0.004    0.000 {method &#39;reciprocal&#39; of &#39;torch._C._TensorBase&#39; objects}
+     1100    0.004    0.000    0.005    0.000 __init__.py:28(_make_grads)
+    17426    0.004    0.000    0.004    0.000 {built-in method builtins.isinstance}
+        1    0.004    0.004    2.184    2.184 trainer.py:92(loop)
+     1000    0.003    0.000    0.003    0.000 functional.py:150(_fill_in_zeros)
+     1000    0.003    0.000    0.005    0.000 functional.py:77(_validate_v)
+     1000    0.003    0.000    0.258    0.000 pedped_1d.py:43(value_r_ab)
+      200    0.003    0.000    0.003    0.000 {built-in method torch._ops.profiler._record_function_enter}
+     2000    0.002    0.000    0.004    0.000 grad_mode.py:167(__enter__)
+     2388    0.002    0.000    0.003    0.000 _tensor.py:967(grad)
+     2000    0.002    0.000    0.033    0.000 functional.py:1831(linear)
+      100    0.002    0.000    0.006    0.000 sgd.py:76(step)
+      100    0.002    0.000    0.008    0.000 optimizer.py:188(zero_grad)
+     2396    0.002    0.000    0.002    0.000 {method &#39;requires_grad_&#39; of &#39;torch._C._TensorBase&#39; objects}
+      100    0.002    0.000    0.014    0.000 optimizer.py:83(wrapper)
+     2000    0.002    0.000    0.016    0.000 activation.py:825(forward)
+     1000    0.002    0.000    0.002    0.000 container.py:129(__iter__)
+      200    0.002    0.000    0.002    0.000 {built-in method zeros}
+     2000    0.001    0.000    0.002    0.000 grad_mode.py:171(__exit__)
+     1200    0.001    0.000    0.002    0.000 grad_mode.py:213(__init__)
+     6200    0.001    0.000    0.001    0.000 {built-in method torch._C._set_grad_enabled}
+     1000    0.001    0.000    0.001    0.000 functional.py:95(_check_requires_grad)
+      400    0.001    0.000    0.001    0.000 {method &#39;add_&#39; of &#39;torch._C._TensorBase&#39; objects}
+     2000    0.001    0.000    0.002    0.000 functional.py:66(_grad_postprocess)
+     1000    0.001    0.000    0.259    0.000 pedped_1d.py:91(compute)
+     8222    0.001    0.000    0.001    0.000 {built-in method builtins.len}
+     2200    0.001    0.000    0.001    0.000 {method &#39;size&#39; of &#39;torch._C._TensorBase&#39; objects}
+     1000    0.001    0.000    0.001    0.000 grad_mode.py:220(__exit__)
+     1100    0.001    0.000    0.002    0.000 _VF.py:25(__getattr__)
+      200    0.001    0.000    0.004    0.000 profiler.py:613(__enter__)
+     3300    0.001    0.000    0.001    0.000 {built-in method torch._C.is_grad_enabled}
+     2000    0.001    0.000    0.001    0.000 functional.py:26(_tuple_postprocess)
+     4300    0.001    0.000    0.001    0.000 {method &#39;append&#39; of &#39;list&#39; objects}
+      100    0.001    0.000    0.008    0.000 functional.py:3031(l1_loss)
+      100    0.001    0.000    0.001    0.000 {built-in method broadcast_tensors}
+     3100    0.001    0.000    0.001    0.000 {built-in method torch._C._has_torch_function_variadic}
+      100    0.001    0.000    0.001    0.000 {built-in method ones_like}
+      100    0.001    0.000    0.008    0.000 grad_mode.py:25(decorate_context)
+      100    0.001    0.000    0.748    0.007 __init__.py:68(backward)
+     1000    0.001    0.000    0.001    0.000 simulator.py:93(f_aB)
+      100    0.001    0.000    0.002    0.000 functional.py:45(broadcast_tensors)
+     1100    0.001    0.000    0.001    0.000 __init__.py:60(_tensor_or_tensors_to_tuple)
+      200    0.001    0.000    0.001    0.000 {built-in method torch._ops.profiler._record_function_exit}
+      100    0.001    0.000    0.001    0.000 simulator.py:55(normalize_state)
+      100    0.001    0.000    0.001    0.000 grad_mode.py:119(__init__)
+      100    0.001    0.000    0.002    0.000 _functional.py:146(sgd)
+     3100    0.001    0.000    0.001    0.000 {built-in method torch._C._has_torch_function}
+      100    0.001    0.000    0.749    0.007 _tensor.py:205(backward)
+      200    0.001    0.000    0.002    0.000 profiler.py:605(__init__)
+     1000    0.000    0.000    0.000    0.000 {built-in method builtins.iter}
+      804    0.000    0.000    0.001    0.000 _tensor.py:615(__hash__)
+     1100    0.000    0.000    0.000    0.000 {built-in method builtins.getattr}
+      396    0.000    0.000    0.000    0.000 {method &#39;zero_&#39; of &#39;torch._C._TensorBase&#39; objects}
+     1000    0.000    0.000    0.000    0.000 {method &#39;values&#39; of &#39;collections.OrderedDict&#39; objects}
+     2488    0.000    0.000    0.000    0.000 {built-in method builtins.hasattr}
+     3292    0.000    0.000    0.000    0.000 {built-in method torch._C._has_torch_function_unary}
+      100    0.000    0.000    0.000    0.000 {method &#39;item&#39; of &#39;torch._C._TensorBase&#39; objects}
+      100    0.000    0.000    0.008    0.000 loss.py:96(forward)
+      200    0.000    0.000    0.001    0.000 profiler.py:617(__exit__)
+      102    0.000    0.000    0.000    0.000 {method &#39;format&#39; of &#39;str&#39; objects}
+      100    0.000    0.000    0.001    0.000 grad_mode.py:124(__enter__)
+      806    0.000    0.000    0.000    0.000 {built-in method builtins.id}
+     1000    0.000    0.000    0.000    0.000 grad_mode.py:217(__enter__)
+      100    0.000    0.000    0.000    0.000 grad_mode.py:128(__exit__)
+       10    0.000    0.000    0.000    0.000 random.py:293(shuffle)
+      100    0.000    0.000    0.000    0.000 _reduction.py:7(get_enum)
+       90    0.000    0.000    0.000    0.000 random.py:250(_randbelow_with_getrandbits)
+        1    0.000    0.000    0.000    0.000 socket.py:613(send)
+        2    0.000    0.000    0.000    0.000 {built-in method torch._C._jit_get_operation}
+      100    0.000    0.000    0.000    0.000 {method &#39;numel&#39; of &#39;torch._C._TensorBase&#39; objects}
+      100    0.000    0.000    0.000    0.000 _jit_internal.py:881(is_scripting)
+       12    0.000    0.000    0.000    0.000 module.py:1133(__setattr__)
+      144    0.000    0.000    0.000    0.000 {method &#39;getrandbits&#39; of &#39;_random.Random&#39; objects}
+        2    0.000    0.000    0.000    0.000 _ops.py:56(__getattr__)
+        2    0.000    0.000    0.000    0.000 iostream.py:535(write)
+        1    0.000    0.000    0.000    0.000 {built-in method builtins.print}
+        1    0.000    0.000    0.000    0.000 iostream.py:203(schedule)
+       90    0.000    0.000    0.000    0.000 {method &#39;bit_length&#39; of &#39;int&#39; objects}
+        1    0.000    0.000    0.000    0.000 module.py:250(__init__)
+        2    0.000    0.000    0.000    0.000 _builtins.py:160(_register_builtin)
+        1    0.000    0.000    0.000    0.000 trainer.py:17(__init__)
+        2    0.000    0.000    0.000    0.000 iostream.py:444(_is_master_process)
+        1    0.000    0.000    0.000    0.000 _ops.py:52(__init__)
+        1    0.000    0.000    0.000    0.000 threading.py:1071(is_alive)
+        2    0.000    0.000    0.000    0.000 {built-in method posix.getpid}
+        1    0.000    0.000    0.000    0.000 _ops.py:75(__getattr__)
+        1    0.000    0.000    0.000    0.000 cProfile.py:133(__exit__)
+        2    0.000    0.000    0.000    0.000 iostream.py:465(_schedule_flush)
+       36    0.000    0.000    0.000    0.000 {method &#39;get&#39; of &#39;dict&#39; objects}
+        1    0.000    0.000    0.000    0.000 iostream.py:90(_event_pipe)
+        1    0.000    0.000    0.000    0.000 threading.py:1017(_wait_for_tstate_lock)
+        1    0.000    0.000    0.000    0.000 loss.py:15(__init__)
+        1    0.000    0.000    0.000    0.000 loss.py:93(__init__)
+        1    0.000    0.000    0.000    0.000 {method &#39;acquire&#39; of &#39;_thread.lock&#39; objects}
+        1    0.000    0.000    0.000    0.000 {built-in method torch._C._log_api_usage_once}
+        2    0.000    0.000    0.000    0.000 _builtins.py:129(_get_builtin_table)
+        2    0.000    0.000    0.000    0.000 {method &#39;write&#39; of &#39;_io.StringIO&#39; objects}
+        3    0.000    0.000    0.000    0.000 {built-in method builtins.setattr}
+        1    0.000    0.000    0.000    0.000 threading.py:513(is_set)
+        1    0.000    0.000    0.000    0.000 {method &#39;append&#39; of &#39;collections.deque&#39; objects}
+        1    0.000    0.000    0.000    0.000 {method &#39;disable&#39; of &#39;_lsprof.Profiler&#39; objects}
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;pstats.Stats at 0x7f00e83cc550&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>flameprof<span class="w"> </span>simulator.prof<span class="w"> </span>&gt;<span class="w"> </span>simulator_flame.svg
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">IPython</span>
+<span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">SVG</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;simulator_flame.svg&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/0536a3501332d8aaea4ec668cff78f8473b960767bd507ace99e2c9900291733.svg" src="_images/0536a3501332d8aaea4ec668cff78f8473b960767bd507ace99e2c9900291733.svg" /></div>
+</div>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="integrators.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Integrators</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="pedped_1d.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">1D</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inference-for-one-scenario">Inference for one Scenario</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            <div class="bd-footer-content__inner">
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By <a href="https://www.svenkreiss.com">Sven Kreiss</a> and <a href="https://github.com/svenkreiss/socialforce/graphs/contributors">contributors</a>.
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2020-2021.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+<div class="extra_footer">
+  <p>Powered by <a href="https://jupyterbook.org/">Jupyter Book</a>.</p>
+
+</div>
+  </div>
+  
+</div></div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=12da95d707ffb74b382d"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=12da95d707ffb74b382d"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
